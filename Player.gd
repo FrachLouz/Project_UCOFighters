@@ -1,8 +1,8 @@
 extends KinematicBody2D  # <--- cambia de Node2D a KinematicBody2D
 
-const Punch = preload("res://Punch.tscn")
-const Kick = preload("res://Kick.tscn")
-const PuncHitbox = preload("res://PunchHitbox.tscn")
+const Punch = preload("res://Attacks/Punch.tscn")
+const Kick = preload("res://Attacks/Kick.tscn")
+const PuncHitbox = preload("res://Attacks/PunchHitbox.tscn")
 onready var collision_shape = $CollisionShape2D
 var speed := 8
 onready var is_player_lock = false #En true, evitara que el jugador realize cualquier accion
