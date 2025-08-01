@@ -19,7 +19,7 @@ texture = ExtResource( 2 )
 script = ExtResource( 1 )
 wait_ticks = 3
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="." groups=["hitbox"]]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 position = Vector2( 38.5, -46 )

@@ -16,6 +16,7 @@ var is_cancelable = false
 func _ready() -> void:
 	SyncManager.connect("scene_spawned", self, "_on_SyncManager_scene_spawned")
 	SyncManager.connect("scene_despawned", self, "_on_SyncManager_scene_despawned")
+	connect("body_entered", self, "_on_body_entered")
 
 func _get_local_input() -> Dictionary:
 	var input_vector = Input.get_vector(input_prefix + "left", input_prefix + "right", "ui_up", "ui_down")
@@ -46,6 +47,7 @@ func _network_process(input: Dictionary) -> void:
 			
 		if not _will_collide(motion) && not is_lock && not is_lock_kick:
 			position += motion
+			
 	
 func _will_collide(motion: Vector2) -> bool:
 	var space_state = get_world_2d().direct_space_state
@@ -76,6 +78,7 @@ func _on_SyncManager_scene_despawned(name, despawned_node) -> void:
 		var player_node = get_node(player_path)
 		if player_node == self:
 			is_lock = false
+			is_cancelable = false
 	
 	if name == 'PunchHitbox':
 		var player_path = despawned_node.player_path
@@ -101,4 +104,9 @@ func _load_state(state: Dictionary) -> void:
 	is_lock = state["is_lock"]
 	is_lock_kick = state["is_lock_kick"]
 	is_cancelable = state["is_cancelable"]
+
+func _on_Hurtbox_body_entered(body):
+	if body.is_in_group("hitbox"):
+		print("ME HAN GOLPEADO")
+	print("ALGO ME HA DADO, SEPA DIOS EL QUE")
 

@@ -33,7 +33,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Project_UCOFighters"
-run/main_scene="res://Main.tscn"
+run/main_scene="res://StartScreen.tscn"
 config/icon="res://icon.png"
 
 [autoload]
@@ -44,6 +44,10 @@ SyncDebugger="*res://addons/godot-rollback-netcode/SyncDebugger.gd"
 [editor_plugins]
 
 enabled=PoolStringArray( "res://addons/godot-rollback-netcode/plugin.cfg" )
+
+[gui]
+
+theme/custom="res://themes/kenneyUI-blue.tres"
 
 [input]
 
@@ -105,15 +109,10 @@ player2_attack={
  ]
 }
 
-[network]
-
-rollback/debug/rollback_ticks=4
-rollback/debug/random_rollback_ticks=10
-
 [physics]
 
 common/enable_pause_aware_picking=true
 
 [rendering]
 
-environment/default_environment="res://default_env.tres"
+environment/default_environment="res://themes/default_env.tres"
