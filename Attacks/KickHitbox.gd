@@ -4,7 +4,11 @@ onready var host_player = get_tree().get_root().get_node("Main/HostPlayer").get_
 onready var active_timer = $ActiveTimer
 onready var sprite_width = $AttackVisualBox.texture.get_width() * $AttackVisualBox.scale.x
 
+var player_path = null
+
 func _network_spawn(data: Dictionary) -> void:
+	
+	player_path = data['player_path']
 	
 	if not data['inverse']:
 		global_position = data['position']

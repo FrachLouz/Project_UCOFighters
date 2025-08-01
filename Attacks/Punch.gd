@@ -7,12 +7,16 @@ onready var host_player = get_tree().get_root().get_node("Main/HostPlayer").get_
 onready var sprite_width = $AttackVisualBox.texture.get_width() * $AttackVisualBox.scale.x
 onready var inverse = false
 
+var player_path = null
+
 func _network_spawn_preprocess(data: Dictionary) -> Dictionary:
 	data['player_path'] = data['player'].get_path()
 	data.erase('player')
 	return data
 
 func _network_spawn(data: Dictionary) -> void:
+	
+	player_path = data['player_path']
 	
 	if data['player_path'] == host_player:
 		global_position = data['position']
@@ -25,7 +29,10 @@ func _network_spawn(data: Dictionary) -> void:
 
 func _on_StartupTimer_timeout():
 	startup_timer.stop()
-	SyncManager.spawn("PunchHitbox", get_parent(), PunchHitbox, { position = global_position, inverse = inverse, offset = sprite_width})
+	SyncManager.spawn("PunchHitbox", get_parent(), PunchHitbox, { position = global_position, 
+																inverse = inverse, 
+																offset = sprite_width,
+																player_path = player_path})
 
 func _on_PunchTimer_timeout():
 	SyncManager.despawn(self)

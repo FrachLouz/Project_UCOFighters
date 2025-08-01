@@ -73,7 +73,7 @@ func _on_SyncManager_sync_started() -> void:
 func _on_SyncManager_sync_stopped() -> void:
 	pass
 
-func _on_yncManager_sync_lost() -> void:
+func _on_SyncManager_sync_lost() -> void:
 	sync_label.visible = true
 
 func _on_yncManager_sync_regained() -> void:
