@@ -1,4 +1,4 @@
-extends Node2D
+extends Area2D
 
 const KickHitbox = preload("res://Attacks/KickHitbox.tscn")
 onready var startup_timer = $StartupTimer
@@ -37,3 +37,5 @@ func _on_StartupTimer_timeout():
 func _on_KickTimer_timeout():
 	SyncManager.despawn(self)
 	
+func take_hit(object_path: NodePath):
+	print(self.get_path(), " me han golpeado")

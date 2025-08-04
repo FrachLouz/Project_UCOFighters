@@ -5,19 +5,23 @@ const Kick = preload("res://Attacks/Kick.tscn")
 const PuncHitbox = preload("res://Attacks/PunchHitbox.tscn")
 
 onready var collision_shape = $CollisionShape2D
+onready var hurtbox_shape = $HurtboxArea
+onready var hitstun_timer = $HitstunTimer
 onready var main = get_tree().get_root().get_node("Main")
+onready var player_path = self.get_path()
 
 var input_prefix := "player1_"
 var speed := 8
 var is_lock = false
 var is_lock_kick = false
 var is_cancelable = false
+var is_hitstun = false
+var is_blocking = false
 
 func _ready() -> void:
 	SyncManager.connect("scene_spawned", self, "_on_SyncManager_scene_spawned")
 	SyncManager.connect("scene_despawned", self, "_on_SyncManager_scene_despawned")
-	connect("body_entered", self, "_on_body_entered")
-
+	
 func _get_local_input() -> Dictionary:
 	var input_vector = Input.get_vector(input_prefix + "left", input_prefix + "right", "ui_up", "ui_down")
 	var input := {}
@@ -39,16 +43,24 @@ func _network_process(input: Dictionary) -> void:
 	
 		var motion = input.get("input_vector", Vector2.ZERO).normalized() * speed
 		
-		if input.get("attack", false) && not is_lock && not is_lock_kick:
+		if player_path == "/root/Main/HostPlayer" && input.get("input_vector") == Vector2.LEFT:
+			is_blocking = true
+		else:
+			is_blocking = false
+		if player_path == "/root/Main/ClientPlayer" && input.get("input_vector") == Vector2.RIGHT:
+			is_blocking = true
+		else:
+			is_blocking = false
+		
+		if input.get("attack", false) && not is_lock && not is_lock_kick && not is_hitstun:
 			SyncManager.spawn("Punch", get_parent(), Punch, { position = global_position, player = self})
 			
 		if input.get("attack", false) && is_cancelable:
 			SyncManager.spawn("Kick", get_parent(), Kick, {position = global_position, player = self})
 			
-		if not _will_collide(motion) && not is_lock && not is_lock_kick:
+		if not _will_collide(motion) && not is_lock && not is_lock_kick && not is_hitstun:
 			position += motion
-			
-	
+
 func _will_collide(motion: Vector2) -> bool:
 	var space_state = get_world_2d().direct_space_state
 	var shape = collision_shape.shape
@@ -96,7 +108,9 @@ func _save_state() -> Dictionary:
 	return { "position": position,
 		"is_lock": is_lock,
 		"is_lock_kick": is_lock_kick,
-		"is_cancelable": is_cancelable
+		"is_cancelable": is_cancelable,
+		"is_blocking": is_blocking,
+		"is_hitstun": is_hitstun
 		}
 
 func _load_state(state: Dictionary) -> void:
@@ -104,9 +118,13 @@ func _load_state(state: Dictionary) -> void:
 	is_lock = state["is_lock"]
 	is_lock_kick = state["is_lock_kick"]
 	is_cancelable = state["is_cancelable"]
-
-func _on_Hurtbox_body_entered(body):
-	if body.is_in_group("hitbox"):
-		print("ME HAN GOLPEADO")
-	print("ALGO ME HA DADO, SEPA DIOS EL QUE")
-
+	is_blocking = state["is_blocking"]
+	is_hitstun = state["is_hitstun"]
+	
+func get_hurt(object_path: NodePath):
+	print(object_path, " ha golpeado a ", player_path)
+	is_hitstun = true
+	hitstun_timer.start()
+	
+func _on_HitstunTimer_timeout():
+	is_hitstun = false

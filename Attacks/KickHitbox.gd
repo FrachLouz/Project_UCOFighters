@@ -1,4 +1,4 @@
-extends Node2D
+extends Area2D
 
 onready var host_player = get_tree().get_root().get_node("Main/HostPlayer").get_path()
 onready var active_timer = $ActiveTimer

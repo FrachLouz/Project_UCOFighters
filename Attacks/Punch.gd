@@ -1,4 +1,4 @@
-extends Node2D
+extends Area2D
 
 const PunchHitbox = preload("res://Attacks/PunchHitbox.tscn")
 onready var startup_timer = $StartupTimer
@@ -37,3 +37,6 @@ func _on_StartupTimer_timeout():
 func _on_PunchTimer_timeout():
 	SyncManager.despawn(self)
 	
+func take_hit(object_path: NodePath):
+	get_node(player_path).get_hurt(object_path)
+	SyncManager.despawn(self)

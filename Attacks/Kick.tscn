@@ -7,7 +7,7 @@
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 46, 62 )
 
-[node name="Kick" type="Node2D" groups=["hurtbox"]]
+[node name="Kick" type="Area2D" groups=["hurtbox", "network_sync"]]
 script = ExtResource( 2 )
 
 [node name="AttackVisualBox" type="Sprite" parent="."]
@@ -23,9 +23,7 @@ wait_ticks = 15
 script = ExtResource( 1 )
 wait_ticks = 35
 
-[node name="Area2D" type="Area2D" parent="."]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="HurtboxCollision" type="CollisionShape2D" parent="."]
 position = Vector2( 47, -62 )
 shape = SubResource( 1 )
 
