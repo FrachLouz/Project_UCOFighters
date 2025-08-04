@@ -7,6 +7,7 @@ const PuncHitbox = preload("res://Attacks/PunchHitbox.tscn")
 onready var collision_shape = $CollisionShape2D
 onready var hurtbox_shape = $HurtboxArea
 onready var hitstun_timer = $HitstunTimer
+onready var blockstun_timer = $BlockstunTimer
 onready var main = get_tree().get_root().get_node("Main")
 onready var player_path = self.get_path()
 
@@ -16,6 +17,7 @@ var is_lock = false
 var is_lock_kick = false
 var is_cancelable = false
 var is_hitstun = false
+var is_blockstun = false
 var is_blocking = false
 
 func _ready() -> void:
@@ -52,13 +54,13 @@ func _network_process(input: Dictionary) -> void:
 		else:
 			is_blocking = false
 		
-		if input.get("attack", false) && not is_lock && not is_lock_kick && not is_hitstun:
+		if input.get("attack", false) && not is_lock && not is_lock_kick && not is_hitstun && not is_blockstun:
 			SyncManager.spawn("Punch", get_parent(), Punch, { position = global_position, player = self})
 			
 		if input.get("attack", false) && is_cancelable:
 			SyncManager.spawn("Kick", get_parent(), Kick, {position = global_position, player = self})
 			
-		if not _will_collide(motion) && not is_lock && not is_lock_kick && not is_hitstun:
+		if not _will_collide(motion) && not is_lock && not is_lock_kick && not is_hitstun && not is_blockstun:
 			position += motion
 
 func _will_collide(motion: Vector2) -> bool:
@@ -110,7 +112,8 @@ func _save_state() -> Dictionary:
 		"is_lock_kick": is_lock_kick,
 		"is_cancelable": is_cancelable,
 		"is_blocking": is_blocking,
-		"is_hitstun": is_hitstun
+		"is_hitstun": is_hitstun,
+		"is_blockstun": is_blockstun
 		}
 
 func _load_state(state: Dictionary) -> void:
@@ -120,11 +123,24 @@ func _load_state(state: Dictionary) -> void:
 	is_cancelable = state["is_cancelable"]
 	is_blocking = state["is_blocking"]
 	is_hitstun = state["is_hitstun"]
+	is_blockstun = state["is_blockstun"]
 	
-func get_hurt(object_path: NodePath):
+func manage_hit(object_path: NodePath, killing_blow: bool):
 	print(object_path, " ha golpeado a ", player_path)
-	is_hitstun = true
-	hitstun_timer.start()
+	if is_blocking == true:
+		print("ATAQUE BLOQUEADO")
+		is_blockstun = true
+		blockstun_timer.start()
+	else:
+		if killing_blow:
+			print("PARTIDA FINALIZADA:= ", player_path)
+		is_hitstun = true
+		hitstun_timer.start()
 	
 func _on_HitstunTimer_timeout():
 	is_hitstun = false
+
+
+func _on_BlockstunTimer_timeout():
+	is_blockstun = false
+	print("YA NO ESTOY EN BLOCKSTUN")

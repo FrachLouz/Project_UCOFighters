@@ -6,6 +6,7 @@ onready var active_timer = $ActiveTimer
 onready var sprite_width = $AttackVisualBox.texture.get_width() * $AttackVisualBox.scale.x
 
 var player_path = null
+var killing_blow = false
 
 func _network_spawn(data: Dictionary) -> void:
 	
@@ -28,4 +29,4 @@ func check_colission():
 	for body in get_overlapping_areas():
 		if player_path != body.player_path:
 			if body.has_method("take_hit"):
-				body.take_hit(player_path)
+				body.take_hit(player_path, killing_blow)

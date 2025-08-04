@@ -37,5 +37,6 @@ func _on_StartupTimer_timeout():
 func _on_KickTimer_timeout():
 	SyncManager.despawn(self)
 	
-func take_hit(object_path: NodePath):
-	print(self.get_path(), " me han golpeado")
+func take_hit(object_path: NodePath, killing_blow: bool):
+	get_node(player_path).manage_hit(object_path, killing_blow)
+	SyncManager.despawn(self)

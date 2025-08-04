@@ -33,4 +33,9 @@ shape = SubResource( 2 )
 script = ExtResource( 4 )
 wait_ticks = 60
 
+[node name="BlockstunTimer" type="Node" parent="."]
+script = ExtResource( 4 )
+wait_ticks = 30
+
 [connection signal="timeout" from="HitstunTimer" to="." method="_on_HitstunTimer_timeout"]
+[connection signal="timeout" from="BlockstunTimer" to="." method="_on_BlockstunTimer_timeout"]

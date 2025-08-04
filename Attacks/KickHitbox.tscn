@@ -17,7 +17,7 @@ texture = ExtResource( 2 )
 
 [node name="ActiveTimer" type="Node" parent="."]
 script = ExtResource( 1 )
-wait_ticks = 3
+wait_ticks = 2
 
 [node name="HitboxCollision" type="CollisionShape2D" parent="."]
 position = Vector2( 38.5, -46 )
