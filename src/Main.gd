@@ -121,7 +121,7 @@ func _on_HostPlayer_game_lost():
 	client_wins += 1
 	clientwin_label.text = String(client_wins)
 	stop_match()
-	yield(wait_for_restart(), "completed")
+	yield(get_tree().create_timer(3.0), "timeout")
 	restart_game()
 	win_screen.visible = false
 	
@@ -131,10 +131,10 @@ func _on_ClientPlayer_game_lost():
 	host_wins += 1
 	hostwin_label.text = String(host_wins)
 	stop_match()
-	yield(wait_for_restart(), "completed")
+	yield(get_tree().create_timer(3.0), "timeout")
+	#yield(wait_for_restart(), "completed")
 	restart_game()
 	win_screen.visible = false
-
 
 func _on_HostPlayer_update_shield():
 	host_shields.text = String($HostPlayer.shield_count)

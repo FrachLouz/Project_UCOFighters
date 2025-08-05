@@ -12,6 +12,13 @@ onready var slide_timer = $SlideTimer
 onready var main = get_tree().get_root().get_node("Main")
 onready var player_path = self.get_path()
 
+onready var idle_animation = $IdleAnimation
+onready var punch_animation = $PunchAnimation
+onready var kick_animation = $KickAnimation
+onready var move_animation = $MoveAnimation
+onready var hit_animation = $HitAnimation
+onready var death_animation = $DeathAnimation
+
 signal game_lost()
 signal update_shield()
 
@@ -30,6 +37,9 @@ var sliding = false
 func _ready() -> void:
 	SyncManager.connect("scene_spawned", self, "_on_SyncManager_scene_spawned")
 	SyncManager.connect("scene_despawned", self, "_on_SyncManager_scene_despawned")
+	set_facing_left()
+	idle_animation.play("IdleAnimation")
+	move_animation.play("MoveAnimation")
 	
 func _get_local_input() -> Dictionary:
 	var input_vector = Input.get_vector(input_prefix + "left", input_prefix + "right", "ui_up", "ui_down")
@@ -37,7 +47,7 @@ func _get_local_input() -> Dictionary:
 	
 	if input_vector != Vector2.ZERO:
 		input["input_vector"] = input_vector
-		
+
 	if Input.is_action_just_pressed(input_prefix + "attack"):
 		input["attack"] = true
 	
@@ -67,8 +77,14 @@ func _network_process(input: Dictionary) -> void:
 			SyncManager.spawn("Kick", get_parent(), Kick, {position = global_position, player = self})
 			
 		if not _will_collide(motion) && not is_lock && not is_lock_kick && not is_hitstun && not is_blockstun:
+			if motion != Vector2(0,0):
+				$MoveSprites.visible = true
+				$IdleSprites.visible = false
+			else:
+				$MoveSprites.visible = false
+				$IdleSprites.visible = true
 			position += motion
-			
+
 		if sliding:
 			if player_path == "/root/Main/HostPlayer":
 				position += Vector2(1,0) * speed
@@ -92,10 +108,17 @@ func _on_SyncManager_scene_spawned(name, spawned_node, scene, data) -> void:
 	
 	if name == 'Punch' and data['player_path'] == self.get_path():
 		is_lock = true
+		$IdleSprites.visible = false
+		$MoveSprites.visible = false
+		$PunchSprites.visible = true
+		punch_animation.play("PunchAnimation")
 	
 	if name == 'Kick' and data['player_path'] == self.get_path():
 		is_lock_kick = true
 		is_cancelable = false
+		$PunchSprites.visible = false
+		$KickSprites.visible = true
+		kick_animation.play("KickAnimation")
 
 func _on_SyncManager_scene_despawned(name, despawned_node) -> void:
 	
@@ -105,6 +128,9 @@ func _on_SyncManager_scene_despawned(name, despawned_node) -> void:
 		if player_node == self:
 			is_lock = false
 			is_cancelable = false
+			if not is_lock_kick:
+				$IdleSprites.visible = true
+			$PunchSprites.visible = false
 	
 	if name == 'PunchHitbox':
 		var player_path = despawned_node.player_path
@@ -117,6 +143,8 @@ func _on_SyncManager_scene_despawned(name, despawned_node) -> void:
 		var player_node = get_node(player_path)
 		if player_node == self:
 			is_lock_kick = false
+			$KickSprites.visible = false
+			$IdleSprites.visible = true
 
 func _save_state() -> Dictionary:
 	return { "position": position,
@@ -151,7 +179,14 @@ func manage_hit(object_path: NodePath, killing_blow: bool):
 		is_blockstun = true
 		blockstun_timer.start()
 	else:
+		$HitSprites.visible = true
+		$IdleSprites.visible = false
+		hit_animation.play("HitAnimation")
 		if killing_blow:
+			$IdleSprites.visible = false
+			$HitSprites.visible = false
+			$DeathSprites.visible = true
+			death_animation.play("DeathAnimation")
 			print("PARTIDA FINALIZADA:= ", player_path)
 			emit_signal("game_lost")
 		is_hitstun = true
@@ -159,12 +194,17 @@ func manage_hit(object_path: NodePath, killing_blow: bool):
 	
 func _on_HitstunTimer_timeout():
 	is_hitstun = false
+	$HitSprites.visible = false
+	if not $DeathSprites.visible:
+		$IdleSprites.visible = true
 
 func _on_BlockstunTimer_timeout():
 	is_blockstun = false
 	print("YA NO ESTOY EN BLOCKSTUN")
 
 func reset():
+	$IdleSprites.visible = true
+	$DeathSprites.visible = false
 	position = original_position
 	is_lock = false
 	shield_count = 3
@@ -180,3 +220,12 @@ func slide():
 
 func _on_SlideTimer_timeout():
 	sliding = false
+	
+func set_facing_left():
+	if player_path != "/root/Main/HostPlayer":
+		$IdleSprites.scale.x = -$IdleSprites.scale.x
+		$PunchSprites.scale.x = -$PunchSprites.scale.x
+		$KickSprites.scale.x = -$KickSprites.scale.x
+		$MoveSprites.scale.x = -$MoveSprites.scale.x
+		$HitSprites.scale.x = -$HitSprites.scale.x
+		$DeathSprites.scale.x = -$DeathSprites.scale.x
