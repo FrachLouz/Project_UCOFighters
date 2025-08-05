@@ -1,15 +1,18 @@
 extends KinematicBody2D  # <--- cambia de Node2D a KinematicBody2D
 
-const Punch = preload("res://Attacks/Punch.tscn")
-const Kick = preload("res://Attacks/Kick.tscn")
-const PuncHitbox = preload("res://Attacks/PunchHitbox.tscn")
+const Punch = preload("res://src/Attacks/Punch.tscn")
+const Kick = preload("res://src/Attacks/Kick.tscn")
 
+onready var original_position = position
 onready var collision_shape = $CollisionShape2D
 onready var hurtbox_shape = $HurtboxArea
 onready var hitstun_timer = $HitstunTimer
 onready var blockstun_timer = $BlockstunTimer
 onready var main = get_tree().get_root().get_node("Main")
 onready var player_path = self.get_path()
+
+signal game_lost()
+signal update_shield()
 
 var input_prefix := "player1_"
 var speed := 8
@@ -19,6 +22,7 @@ var is_cancelable = false
 var is_hitstun = false
 var is_blockstun = false
 var is_blocking = false
+var shield_count = 3
 
 func _ready() -> void:
 	SyncManager.connect("scene_spawned", self, "_on_SyncManager_scene_spawned")
@@ -47,9 +51,7 @@ func _network_process(input: Dictionary) -> void:
 		
 		if player_path == "/root/Main/HostPlayer" && input.get("input_vector") == Vector2.LEFT:
 			is_blocking = true
-		else:
-			is_blocking = false
-		if player_path == "/root/Main/ClientPlayer" && input.get("input_vector") == Vector2.RIGHT:
+		elif player_path == "/root/Main/ClientPlayer" && input.get("input_vector") == Vector2.RIGHT:
 			is_blocking = true
 		else:
 			is_blocking = false
@@ -113,7 +115,8 @@ func _save_state() -> Dictionary:
 		"is_cancelable": is_cancelable,
 		"is_blocking": is_blocking,
 		"is_hitstun": is_hitstun,
-		"is_blockstun": is_blockstun
+		"is_blockstun": is_blockstun,
+		"shield_count": shield_count
 		}
 
 func _load_state(state: Dictionary) -> void:
@@ -124,23 +127,40 @@ func _load_state(state: Dictionary) -> void:
 	is_blocking = state["is_blocking"]
 	is_hitstun = state["is_hitstun"]
 	is_blockstun = state["is_blockstun"]
-	
+	shield_count = state["shield_count"]
+
 func manage_hit(object_path: NodePath, killing_blow: bool):
+	
 	print(object_path, " ha golpeado a ", player_path)
-	if is_blocking == true:
+	if is_blocking == true && shield_count >= 0:
 		print("ATAQUE BLOQUEADO")
+		if killing_blow:
+			modify_shield(1)
+		else:
+			modify_shield(-1)
 		is_blockstun = true
 		blockstun_timer.start()
 	else:
 		if killing_blow:
 			print("PARTIDA FINALIZADA:= ", player_path)
+			emit_signal("game_lost")
 		is_hitstun = true
 		hitstun_timer.start()
 	
 func _on_HitstunTimer_timeout():
 	is_hitstun = false
 
-
 func _on_BlockstunTimer_timeout():
 	is_blockstun = false
 	print("YA NO ESTOY EN BLOCKSTUN")
+
+func reset():
+	position = original_position
+	is_lock = false
+	shield_count = 3
+	emit_signal("update_shield")
+
+func modify_shield(value: int):
+	shield_count += value
+	emit_signal("update_shield")
+

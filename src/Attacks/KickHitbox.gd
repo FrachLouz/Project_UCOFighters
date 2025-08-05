@@ -11,7 +11,6 @@ func _network_spawn(data: Dictionary) -> void:
 	
 	player_path = data['player_path']
 	
-	
 	if not data['inverse']:
 		global_position = data['position']
 	else:

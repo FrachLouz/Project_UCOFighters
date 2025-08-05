@@ -1,9 +1,8 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=5 format=2]
 
-[ext_resource path="res://Main.gd" type="Script" id=1]
-[ext_resource path="res://Player.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Wall.tscn" type="PackedScene" id=3]
-[ext_resource path="res://maxresdefault-750769485.jpg" type="Texture" id=4]
+[ext_resource path="res://src/Main.gd" type="Script" id=1]
+[ext_resource path="res://src/Player/Player.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/Wall/Wall.tscn" type="PackedScene" id=3]
 [ext_resource path="res://themes/kenneyUI-blue.tres" type="Theme" id=5]
 
 [node name="Main" type="Node2D"]
@@ -121,12 +120,70 @@ margin_left = -106.0
 margin_bottom = 14.0
 text = "Regaining Sync..."
 
-[node name="BackGround" type="CanvasLayer" parent="."]
-layer = -1
+[node name="RestartButton" type="Button" parent="CanvasLayer"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_top = -38.251
+margin_right = 66.3241
+text = "Restart"
 
-[node name="BackGroundSprite" type="Sprite" parent="BackGround"]
-position = Vector2( 521, 247 )
-texture = ExtResource( 4 )
+[node name="WinScreenLabel" type="Label" parent="CanvasLayer"]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -127.0
+margin_top = -9.0
+margin_right = 127.0
+margin_bottom = 9.0
+theme = ExtResource( 5 )
+align = 1
+valign = 1
+
+[node name="HostShields" type="Label" parent="CanvasLayer"]
+anchor_top = 0.5
+anchor_bottom = 0.5
+margin_top = -7.0
+margin_right = 40.0
+margin_bottom = 7.0
+theme = ExtResource( 5 )
+text = "3"
+align = 1
+valign = 1
+
+[node name="ClientShields" type="Label" parent="CanvasLayer"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = -40.0
+margin_top = -7.0
+margin_bottom = 7.0
+theme = ExtResource( 5 )
+text = "3"
+align = 1
+valign = 1
+
+[node name="HostWins" type="Label" parent="CanvasLayer"]
+margin_left = 209.0
+margin_top = 530.0
+margin_right = 249.0
+margin_bottom = 544.0
+text = "0"
+align = 1
+valign = 1
+
+[node name="ClientWins" type="Label" parent="CanvasLayer"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 779.0
+margin_top = -62.0
+margin_right = 819.0
+margin_bottom = -48.0
+text = "0"
+align = 1
+valign = 1
 
 [node name="HostPlayer" parent="." instance=ExtResource( 2 )]
 position = Vector2( 230, 450 )
@@ -144,3 +201,8 @@ position = Vector2( 1025, -2 )
 [connection signal="pressed" from="CanvasLayer/ConnectionPanel/GridContainer/HostButton" to="." method="_on_HostButton_pressed"]
 [connection signal="pressed" from="CanvasLayer/ConnectionPanel/GridContainer/ClientButton" to="." method="_on_ClientButton_pressed"]
 [connection signal="pressed" from="CanvasLayer/ResetButton" to="." method="_on_ResetButton_pressed"]
+[connection signal="pressed" from="CanvasLayer/RestartButton" to="." method="_on_RestartButton_pressed"]
+[connection signal="game_lost" from="HostPlayer" to="." method="_on_HostPlayer_game_lost"]
+[connection signal="update_shield" from="HostPlayer" to="." method="_on_HostPlayer_update_shield"]
+[connection signal="game_lost" from="ClientPlayer" to="." method="_on_ClientPlayer_game_lost"]
+[connection signal="update_shield" from="ClientPlayer" to="." method="_on_ClientPlayer_update_shield"]

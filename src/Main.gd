@@ -9,6 +9,16 @@ onready var port_field = $CanvasLayer/ConnectionPanel/GridContainer/PortField
 onready var message_label = $CanvasLayer/ConnectionLabel
 onready var sync_label = $CanvasLayer/SyncLostLabel
 
+#VARIABLES DE UI, SUJETAS A CAMBIO
+onready var win_screen = $CanvasLayer/WinScreenLabel
+onready var host_shields = $CanvasLayer/HostShields
+onready var client_shields = $CanvasLayer/ClientShields
+onready var hostwin_label = $CanvasLayer/HostWins
+onready var clientwin_label = $CanvasLayer/ClientWins
+
+var host_wins = 0
+var client_wins = 0
+
 func _ready() -> void:
 	get_tree().connect("network_peer_connected", self, "_on_network_peer_connected")
 	get_tree().connect("network_peer_disconnected", self, "_on_network_peer_disconnected")
@@ -58,7 +68,6 @@ func _on_network_peer_disconnected(peer_id: int):
 func _on_server_disconnected() -> void:
 	_on_network_peer_disconnected(1)
 
-
 func _on_ResetButton_pressed():
 	SyncManager.stop()
 	SyncManager.clear_peers()
@@ -100,3 +109,49 @@ func _on_OfflineButton_pressed():
 	SyncManager.network_adaptor = DummyNetworkAdaptor.new()
 	SyncManager.start()
 	$ClientPlayer.input_prefix = "player2_"
+
+
+func _on_RestartButton_pressed():
+	restart_game()
+
+func restart_game():
+	yield(get_tree().create_timer(0.2), "timeout")
+	$ClientPlayer.reset()
+	$HostPlayer.reset()
+
+func _on_HostPlayer_game_lost():
+	win_screen.text = "PLAYER 2 WINS"
+	win_screen.visible = true
+	client_wins += 1
+	clientwin_label.text = String(client_wins)
+	stop_match()
+	yield(wait_for_restart(), "completed")
+	restart_game()
+	win_screen.visible = false
+	
+func _on_ClientPlayer_game_lost():
+	win_screen.text = "PLAYER 1 WINS"
+	win_screen.visible = true
+	host_wins += 1
+	hostwin_label.text = String(host_wins)
+	stop_match()
+	yield(wait_for_restart(), "completed")
+	restart_game()
+	win_screen.visible = false
+
+
+func _on_HostPlayer_update_shield():
+	host_shields.text = String($HostPlayer.shield_count)
+	
+func _on_ClientPlayer_update_shield():
+	client_shields.text = String($ClientPlayer.shield_count)
+
+func stop_match():
+	$HostPlayer.is_lock = true
+	$ClientPlayer.is_lock = true
+
+func wait_for_restart():
+	while true:
+		yield(get_tree(), "idle_frame")
+		if Input.is_action_just_pressed("player1_attack") or Input.is_action_just_pressed("player2_attack"):
+			break

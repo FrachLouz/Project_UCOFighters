@@ -1,8 +1,8 @@
 extends Area2D
 
-const KickHitbox = preload("res://Attacks/KickHitbox.tscn")
+const PunchHitbox = preload("res://src/Attacks/PunchHitbox.tscn")
 onready var startup_timer = $StartupTimer
-onready var kick_timer = $KickTimer
+onready var punch_timer = $PunchTimer
 onready var host_player = get_tree().get_root().get_node("Main/HostPlayer").get_path()
 onready var sprite_width = $AttackVisualBox.texture.get_width() * $AttackVisualBox.scale.x
 onready var inverse = false
@@ -24,17 +24,17 @@ func _network_spawn(data: Dictionary) -> void:
 		inverse = true
 		global_position = Vector2(data['position'].x-sprite_width, data['position'].y)
 	
-	kick_timer.start()
+	punch_timer.start()
 	startup_timer.start()
 
 func _on_StartupTimer_timeout():
 	startup_timer.stop()
-	SyncManager.spawn("KickHitbox", get_parent(), KickHitbox, { position = global_position, 
+	SyncManager.spawn("PunchHitbox", get_parent(), PunchHitbox, { position = global_position, 
 																inverse = inverse, 
 																offset = sprite_width,
 																player_path = player_path})
 
-func _on_KickTimer_timeout():
+func _on_PunchTimer_timeout():
 	SyncManager.despawn(self)
 	
 func take_hit(object_path: NodePath, killing_blow: bool):

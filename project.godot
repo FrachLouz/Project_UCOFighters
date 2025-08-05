@@ -33,7 +33,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Project_UCOFighters"
-run/main_scene="res://StartScreen.tscn"
+run/main_scene="res://src/StartScreen.tscn"
 config/icon="res://icon.png"
 
 [autoload]
