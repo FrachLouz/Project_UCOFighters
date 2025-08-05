@@ -5,26 +5,26 @@
 [ext_resource path="res://icon.png" type="Texture" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 46, 62 )
+extents = Vector2( 114, 99 )
 
 [node name="Kick" type="Area2D" groups=["hurtbox", "network_sync"]]
 script = ExtResource( 2 )
 
 [node name="AttackVisualBox" type="Sprite" parent="."]
-position = Vector2( 47, -61.75 )
-scale = Vector2( 1.46875, 1.94531 )
+position = Vector2( 116, -98.75 )
+scale = Vector2( 3.625, 3.10156 )
 texture = ExtResource( 3 )
 
 [node name="StartupTimer" type="Node" parent="."]
 script = ExtResource( 1 )
-wait_ticks = 15
+wait_ticks = 11
 
 [node name="KickTimer" type="Node" parent="."]
 script = ExtResource( 1 )
 wait_ticks = 35
 
 [node name="HurtboxCollision" type="CollisionShape2D" parent="."]
-position = Vector2( 47, -62 )
+position = Vector2( 115, -99 )
 shape = SubResource( 1 )
 
 [connection signal="timeout" from="StartupTimer" to="." method="_on_StartupTimer_timeout"]

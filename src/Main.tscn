@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://src/Main.gd" type="Script" id=1]
 [ext_resource path="res://src/Player/Player.tscn" type="PackedScene" id=2]
 [ext_resource path="res://src/Wall/Wall.tscn" type="PackedScene" id=3]
+[ext_resource path="res://maxresdefault-750769485.jpg" type="Texture" id=4]
 [ext_resource path="res://themes/kenneyUI-blue.tres" type="Theme" id=5]
 
 [node name="Main" type="Node2D"]
@@ -120,13 +121,6 @@ margin_left = -106.0
 margin_bottom = 14.0
 text = "Regaining Sync..."
 
-[node name="RestartButton" type="Button" parent="CanvasLayer"]
-anchor_top = 1.0
-anchor_bottom = 1.0
-margin_top = -38.251
-margin_right = 66.3241
-text = "Restart"
-
 [node name="WinScreenLabel" type="Label" parent="CanvasLayer"]
 visible = false
 anchor_left = 0.5
@@ -196,12 +190,18 @@ position = Vector2( 800, 450 )
 [node name="Wall2" parent="." instance=ExtResource( 3 )]
 position = Vector2( 1025, -2 )
 
+[node name="BackGround" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="BackGroundSprite" type="Sprite" parent="BackGround"]
+position = Vector2( 521, 247 )
+texture = ExtResource( 4 )
+
 [connection signal="pressed" from="CanvasLayer/MainMenu/OnlineButton" to="." method="_on_OnlineButton_pressed"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/OfflineButton" to="." method="_on_OfflineButton_pressed"]
 [connection signal="pressed" from="CanvasLayer/ConnectionPanel/GridContainer/HostButton" to="." method="_on_HostButton_pressed"]
 [connection signal="pressed" from="CanvasLayer/ConnectionPanel/GridContainer/ClientButton" to="." method="_on_ClientButton_pressed"]
 [connection signal="pressed" from="CanvasLayer/ResetButton" to="." method="_on_ResetButton_pressed"]
-[connection signal="pressed" from="CanvasLayer/RestartButton" to="." method="_on_RestartButton_pressed"]
 [connection signal="game_lost" from="HostPlayer" to="." method="_on_HostPlayer_game_lost"]
 [connection signal="update_shield" from="HostPlayer" to="." method="_on_HostPlayer_update_shield"]
 [connection signal="game_lost" from="ClientPlayer" to="." method="_on_ClientPlayer_game_lost"]

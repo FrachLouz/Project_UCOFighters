@@ -2,7 +2,6 @@ extends Area2D
 
 onready var host_player = get_tree().get_root().get_node("Main/HostPlayer").get_path()
 onready var active_timer = $ActiveTimer
-onready var sprite_width = $AttackVisualBox.texture.get_width() * $AttackVisualBox.scale.x
 
 var player_path = null
 var killing_blow = true
@@ -14,8 +13,8 @@ func _network_spawn(data: Dictionary) -> void:
 	if not data['inverse']:
 		global_position = data['position']
 	else:
-		global_position = Vector2(data['position'].x + abs(data['offset']-sprite_width), data['position'].y)
-	
+		global_position = Vector2(data['position'].x + abs(data['offset']), data['position'].y)
+		scale.x = -1
 	active_timer.start()
 
 func _network_process(input:Dictionary):

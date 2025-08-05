@@ -110,10 +110,6 @@ func _on_OfflineButton_pressed():
 	SyncManager.start()
 	$ClientPlayer.input_prefix = "player2_"
 
-
-func _on_RestartButton_pressed():
-	restart_game()
-
 func restart_game():
 	yield(get_tree().create_timer(0.2), "timeout")
 	$ClientPlayer.reset()

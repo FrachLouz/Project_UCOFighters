@@ -8,6 +8,7 @@ onready var collision_shape = $CollisionShape2D
 onready var hurtbox_shape = $HurtboxArea
 onready var hitstun_timer = $HitstunTimer
 onready var blockstun_timer = $BlockstunTimer
+onready var slide_timer = $SlideTimer
 onready var main = get_tree().get_root().get_node("Main")
 onready var player_path = self.get_path()
 
@@ -23,6 +24,8 @@ var is_hitstun = false
 var is_blockstun = false
 var is_blocking = false
 var shield_count = 3
+
+var sliding = false
 
 func _ready() -> void:
 	SyncManager.connect("scene_spawned", self, "_on_SyncManager_scene_spawned")
@@ -60,10 +63,17 @@ func _network_process(input: Dictionary) -> void:
 			SyncManager.spawn("Punch", get_parent(), Punch, { position = global_position, player = self})
 			
 		if input.get("attack", false) && is_cancelable:
+			slide()
 			SyncManager.spawn("Kick", get_parent(), Kick, {position = global_position, player = self})
 			
 		if not _will_collide(motion) && not is_lock && not is_lock_kick && not is_hitstun && not is_blockstun:
 			position += motion
+			
+		if sliding:
+			if player_path == "/root/Main/HostPlayer":
+				position += Vector2(1,0) * speed
+			else:
+				position += Vector2(-1,0) * speed
 
 func _will_collide(motion: Vector2) -> bool:
 	var space_state = get_world_2d().direct_space_state
@@ -72,7 +82,7 @@ func _will_collide(motion: Vector2) -> bool:
 	var params = Physics2DShapeQueryParameters.new()
 	params.set_shape(shape)
 	params.set_transform(Transform2D(0, global_position + motion))
-	params.set_margin(0.2)
+	params.set_margin(15)
 	params.exclude = [self]
 
 	var result = space_state.intersect_shape(params, 1)
@@ -164,3 +174,9 @@ func modify_shield(value: int):
 	shield_count += value
 	emit_signal("update_shield")
 
+func slide():
+	sliding = true
+	slide_timer.start()
+
+func _on_SlideTimer_timeout():
+	sliding = false
