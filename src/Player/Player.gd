@@ -16,6 +16,7 @@ onready var idle_animation = $IdleAnimation
 onready var punch_animation = $PunchAnimation
 onready var kick_animation = $KickAnimation
 onready var move_animation = $MoveAnimation
+onready var move_back_animation = $MoveBackAnimation
 onready var hit_animation = $HitAnimation
 onready var death_animation = $DeathAnimation
 
@@ -40,6 +41,7 @@ func _ready() -> void:
 	set_facing_left()
 	idle_animation.play("IdleAnimation")
 	move_animation.play("MoveAnimation")
+	move_back_animation.play("MoveBackAnimation")
 	
 func _get_local_input() -> Dictionary:
 	var input_vector = Input.get_vector(input_prefix + "left", input_prefix + "right", "ui_up", "ui_down")
@@ -78,10 +80,19 @@ func _network_process(input: Dictionary) -> void:
 			
 		if not _will_collide(motion) && not is_lock && not is_lock_kick && not is_hitstun && not is_blockstun:
 			if motion != Vector2(0,0):
-				$MoveSprites.visible = true
+				if motion == Vector2(-speed,0) && player_path == "/root/Main/HostPlayer":
+					$MoveBackSprites.visible = true
+					$MoveSprites.visible = false
+				elif motion == Vector2(speed,0) && player_path != "/root/Main/HostPlayer":
+					$MoveBackSprites.visible = true
+					$MoveSprites.visible = false
+				else:
+					$MoveSprites.visible = true
+					$MoveBackSprites.visible = false
 				$IdleSprites.visible = false
 			else:
 				$MoveSprites.visible = false
+				$MoveBackSprites.visible = false
 				$IdleSprites.visible = true
 			position += motion
 
@@ -110,6 +121,7 @@ func _on_SyncManager_scene_spawned(name, spawned_node, scene, data) -> void:
 		is_lock = true
 		$IdleSprites.visible = false
 		$MoveSprites.visible = false
+		$MoveBackSprites.visible = false
 		$PunchSprites.visible = true
 		punch_animation.play("PunchAnimation")
 	
@@ -180,6 +192,7 @@ func manage_hit(object_path: NodePath, killing_blow: bool):
 		is_blockstun = true
 		blockstun_timer.start()
 		$MoveSprites.visible = false
+		$MoveBackSprites.visible = false
 		$IdleSprites.visible = true
 	else:
 		$HitSprites.visible = true
@@ -230,5 +243,6 @@ func set_facing_left():
 		$PunchSprites.scale.x = -$PunchSprites.scale.x
 		$KickSprites.scale.x = -$KickSprites.scale.x
 		$MoveSprites.scale.x = -$MoveSprites.scale.x
+		$MoveBackSprites.scale.x = -$MoveBackSprites.scale.x
 		$HitSprites.scale.x = -$HitSprites.scale.x
 		$DeathSprites.scale.x = -$DeathSprites.scale.x
