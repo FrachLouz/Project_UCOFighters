@@ -2,6 +2,10 @@ extends Node2D
 
 const DummyNetworkAdaptor = preload("res://addons/godot-rollback-netcode/DummyNetworkAdaptor.gd")
 
+#Variables del debugger
+const LOG_FILE_DIRECTORY = 'user://detailed_log'
+var logging_enabled := true
+
 onready var main_menu = $CanvasLayer/MainMenu
 onready var connection_panel = $CanvasLayer/ConnectionPanel
 onready var host_field = $CanvasLayer/ConnectionPanel/GridContainer/HostField
@@ -82,8 +86,28 @@ func _on_SyncManager_sync_started() -> void:
 	message_label.text = "Started!"
 	music.play()
 	
+	if logging_enabled:
+		var dir = Directory.new()
+		if not dir.dir_exists(LOG_FILE_DIRECTORY):
+			dir.make_dir(LOG_FILE_DIRECTORY)
+		
+		var datetime = OS.get_datetime(true)
+		var log_file_name = "%04d%02d%02d-%02d%02d%02d-peer-%d.log" % [
+			datetime['year'],
+			datetime['month'],
+			datetime['day'],
+			datetime['hour'],
+			datetime['minute'],
+			datetime['second'],
+			SyncManager.network_adaptor.get_network_unique_id(),
+		]
+		
+		SyncManager.start_logging(LOG_FILE_DIRECTORY + '/' + log_file_name)
+
+	
 func _on_SyncManager_sync_stopped() -> void:
-	pass
+	if logging_enabled:
+		SyncManager.stop_logging()
 
 func _on_SyncManager_sync_lost() -> void:
 	sync_label.visible = true
