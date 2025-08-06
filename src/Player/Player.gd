@@ -199,6 +199,8 @@ func manage_hit(object_path: NodePath, killing_blow: bool):
 		$MoveBackSprites.visible = false
 		$IdleSprites.visible = true
 	else:
+		$MoveSprites.visible = false
+		$MoveBackSprites.visible = false
 		$HitSprites.visible = true
 		$IdleSprites.visible = false
 		hit_animation.play("HitAnimation")

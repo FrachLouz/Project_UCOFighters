@@ -17,9 +17,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -58.0
+margin_left = -75.0
 margin_top = -27.5
-margin_right = 56.0
+margin_right = 75.0
 margin_bottom = 27.5
 
 [node name="OnlineButton" type="Button" parent="CanvasLayer/MainMenu"]
@@ -38,65 +38,66 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -145.0
-margin_top = -72.0
-margin_right = 145.0
-margin_bottom = 72.0
+margin_left = -280.0
+margin_top = -126.5
+margin_right = 280.0
+margin_bottom = 126.5
 theme = ExtResource( 5 )
+custom_constants/close_h_ofs = 0
 window_title = "Online"
 
 [node name="GridContainer" type="GridContainer" parent="CanvasLayer/ConnectionPanel"]
 margin_left = 7.0
 margin_top = 7.0
-margin_right = 280.0
-margin_bottom = 107.0
+margin_right = 551.0
+margin_bottom = 248.0
 columns = 2
 
 [node name="HostLabel" type="Label" parent="CanvasLayer/ConnectionPanel/GridContainer"]
-margin_right = 134.0
-margin_bottom = 18.0
+margin_right = 270.0
+margin_bottom = 45.0
 size_flags_horizontal = 3
 size_flags_vertical = 2
 text = "Host:"
 
 [node name="HostField" type="LineEdit" parent="CanvasLayer/ConnectionPanel/GridContainer"]
-margin_left = 138.0
-margin_right = 272.0
-margin_bottom = 39.4343
+margin_left = 274.0
+margin_right = 544.0
+margin_bottom = 66.4343
 size_flags_horizontal = 3
 size_flags_vertical = 2
 text = "127.0.0.1"
 
 [node name="PortLabel" type="Label" parent="CanvasLayer/ConnectionPanel/GridContainer"]
-margin_top = 43.0
-margin_right = 134.0
-margin_bottom = 61.0
+margin_top = 81.0
+margin_right = 270.0
+margin_bottom = 126.0
 size_flags_horizontal = 3
 size_flags_vertical = 2
 text = "Client:"
 
 [node name="PortField" type="LineEdit" parent="CanvasLayer/ConnectionPanel/GridContainer"]
-margin_left = 138.0
-margin_top = 43.0
-margin_right = 272.0
-margin_bottom = 82.4343
+margin_left = 274.0
+margin_top = 81.0
+margin_right = 544.0
+margin_bottom = 147.434
 size_flags_horizontal = 3
 size_flags_vertical = 2
 text = "9999"
 
 [node name="HostButton" type="Button" parent="CanvasLayer/ConnectionPanel/GridContainer"]
-margin_top = 86.0
-margin_right = 134.0
-margin_bottom = 128.251
+margin_top = 162.0
+margin_right = 270.0
+margin_bottom = 231.251
 size_flags_horizontal = 3
 size_flags_vertical = 2
 text = "Host"
 
 [node name="ClientButton" type="Button" parent="CanvasLayer/ConnectionPanel/GridContainer"]
-margin_left = 138.0
-margin_top = 86.0
-margin_right = 272.0
-margin_bottom = 128.251
+margin_left = 274.0
+margin_top = 162.0
+margin_right = 544.0
+margin_bottom = 231.251
 size_flags_horizontal = 3
 size_flags_vertical = 2
 text = "Client"
@@ -123,15 +124,14 @@ margin_bottom = 14.0
 text = "Regaining Sync..."
 
 [node name="WinScreenLabel" type="Label" parent="CanvasLayer"]
-visible = false
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -127.0
-margin_top = -9.0
-margin_right = 127.0
-margin_bottom = 9.0
+margin_left = -250.0
+margin_top = -63.5
+margin_right = 250.0
+margin_bottom = 63.5
 theme = ExtResource( 5 )
 align = 1
 valign = 1
@@ -139,9 +139,10 @@ valign = 1
 [node name="HostShields" type="Label" parent="CanvasLayer"]
 anchor_top = 0.5
 anchor_bottom = 0.5
+margin_left = 9.0
 margin_top = -7.0
-margin_right = 40.0
-margin_bottom = 7.0
+margin_right = 49.0
+margin_bottom = 38.0
 theme = ExtResource( 5 )
 text = "3"
 align = 1
@@ -195,7 +196,7 @@ position = Vector2( 1025, -2 )
 layer = -1
 
 [node name="BackGroundSprite" type="Sprite" parent="BackGround"]
-position = Vector2( 520, 287 )
+position = Vector2( 477, 299 )
 texture = ExtResource( 4 )
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]

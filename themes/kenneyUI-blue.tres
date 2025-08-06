@@ -174,8 +174,8 @@ texture = ExtResource( 1 )
 region_rect = Rect2( 1051, 317, 4, 100 )
 
 [sub_resource type="DynamicFont" id=31]
+size = 40
 use_mipmaps = true
-use_filter = true
 font_data = ExtResource( 2 )
 
 [resource]
@@ -234,6 +234,7 @@ HSlider/icons/tick = null
 HSlider/styles/grabber_area = SubResource( 17 )
 HSlider/styles/grabber_area_highlight = SubResource( 17 )
 HSlider/styles/slider = SubResource( 17 )
+Label/fonts/font = null
 LineEdit/colors/clear_button_color = Color( 0.88, 0.88, 0.88, 1 )
 LineEdit/colors/clear_button_color_pressed = Color( 1, 1, 1, 1 )
 LineEdit/colors/cursor_color = Color( 0.34902, 0.34902, 0.34902, 1 )
