@@ -118,6 +118,7 @@ func _on_SyncManager_scene_spawned(name, spawned_node, scene, data) -> void:
 		is_cancelable = false
 		$PunchSprites.visible = false
 		$KickSprites.visible = true
+		$IdleSprites.visible = false
 		kick_animation.play("KickAnimation")
 
 func _on_SyncManager_scene_despawned(name, despawned_node) -> void:
@@ -178,6 +179,8 @@ func manage_hit(object_path: NodePath, killing_blow: bool):
 			modify_shield(-1)
 		is_blockstun = true
 		blockstun_timer.start()
+		$MoveSprites.visible = false
+		$IdleSprites.visible = true
 	else:
 		$HitSprites.visible = true
 		$IdleSprites.visible = false

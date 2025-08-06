@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Death.png-d90e3611d0d09fc60804614f60225808.stex"
+path="res://.import/Male_spritesheet_idle.png-b2c9cb06477fa6c8189f976195f822a9.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Death.png"
-dest_files=[ "res://.import/Death.png-d90e3611d0d09fc60804614f60225808.stex" ]
+source_file="res://Male_spritesheet_idle.png"
+dest_files=[ "res://.import/Male_spritesheet_idle.png-b2c9cb06477fa6c8189f976195f822a9.stex" ]
 
 [params]
 

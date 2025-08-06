@@ -180,10 +180,10 @@ align = 1
 valign = 1
 
 [node name="HostPlayer" parent="." instance=ExtResource( 2 )]
-position = Vector2( 230, 450 )
+position = Vector2( 230, 240 )
 
 [node name="ClientPlayer" parent="." instance=ExtResource( 2 )]
-position = Vector2( 800, 450 )
+position = Vector2( 800, 240 )
 
 [node name="Wall" parent="." instance=ExtResource( 3 )]
 
@@ -194,7 +194,7 @@ position = Vector2( 1025, -2 )
 layer = -1
 
 [node name="BackGroundSprite" type="Sprite" parent="BackGround"]
-position = Vector2( 521, 247 )
+position = Vector2( 520, 287 )
 texture = ExtResource( 4 )
 
 [connection signal="pressed" from="CanvasLayer/MainMenu/OnlineButton" to="." method="_on_OnlineButton_pressed"]
