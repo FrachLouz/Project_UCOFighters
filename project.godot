@@ -114,6 +114,10 @@ player2_attack={
  ]
 }
 
+[network]
+
+rollback/sound_manager/default_sound_bus="Sound"
+
 [physics]
 
 common/enable_pause_aware_picking=true

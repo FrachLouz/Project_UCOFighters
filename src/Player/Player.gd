@@ -3,6 +3,10 @@ extends KinematicBody2D  # <--- cambia de Node2D a KinematicBody2D
 const Punch = preload("res://src/Attacks/Punch.tscn")
 const Kick = preload("res://src/Attacks/Kick.tscn")
 
+const BlowSound = preload("res://assets/sounds/body_hit_large_76.wav")
+const KillingBlowSound = preload("res://assets/sounds/body_hit_finisher_52.wav")
+const BlockSound = preload("res://assets/sounds/block_medium_25.wav")
+
 onready var original_position = position
 onready var collision_shape = $CollisionShape2D
 onready var hurtbox_shape = $HurtboxArea
@@ -24,7 +28,7 @@ signal game_lost()
 signal update_shield()
 
 var input_prefix := "player1_"
-var speed := 8
+var speed := 4
 var is_lock = false
 var is_lock_kick = false
 var is_cancelable = false
@@ -74,7 +78,7 @@ func _network_process(input: Dictionary) -> void:
 		if input.get("attack", false) && not is_lock && not is_lock_kick && not is_hitstun && not is_blockstun:
 			SyncManager.spawn("Punch", get_parent(), Punch, { position = global_position, player = self})
 			
-		if input.get("attack", false) && is_cancelable:
+		if input.get("attack", false) && is_cancelable && not is_hitstun:
 			slide()
 			SyncManager.spawn("Kick", get_parent(), Kick, {position = global_position, player = self})
 			
@@ -98,9 +102,11 @@ func _network_process(input: Dictionary) -> void:
 
 		if sliding:
 			if player_path == "/root/Main/HostPlayer":
-				position += Vector2(1,0) * speed
+				if not _will_collide(Vector2(1,0) * speed):
+					position += Vector2(1,0) * speed
 			else:
-				position += Vector2(-1,0) * speed
+				if not _will_collide(Vector2(1,0) * speed):
+					position += Vector2(-1,0) * speed
 
 func _will_collide(motion: Vector2) -> bool:
 	var space_state = get_world_2d().direct_space_state
@@ -141,7 +147,7 @@ func _on_SyncManager_scene_despawned(name, despawned_node) -> void:
 		if player_node == self:
 			is_lock = false
 			is_cancelable = false
-			if not is_lock_kick:
+			if not is_lock_kick && not is_hitstun:
 				$IdleSprites.visible = true
 			$PunchSprites.visible = false
 	
@@ -183,14 +189,12 @@ func _load_state(state: Dictionary) -> void:
 func manage_hit(object_path: NodePath, killing_blow: bool):
 	
 	print(object_path, " ha golpeado a ", player_path)
-	if is_blocking == true && shield_count >= 0:
+	if is_blocking == true && shield_count > 0:
 		print("ATAQUE BLOQUEADO")
-		if killing_blow:
-			modify_shield(1)
-		else:
-			modify_shield(-1)
+		modify_shield(-1)
 		is_blockstun = true
 		blockstun_timer.start()
+		SyncManager.play_sound(str(get_path()) + ":block", BlockSound)
 		$MoveSprites.visible = false
 		$MoveBackSprites.visible = false
 		$IdleSprites.visible = true
@@ -198,20 +202,21 @@ func manage_hit(object_path: NodePath, killing_blow: bool):
 		$HitSprites.visible = true
 		$IdleSprites.visible = false
 		hit_animation.play("HitAnimation")
+		SyncManager.play_sound(str(get_path()) + ":blow", BlowSound)
+		hitstun_timer.start()
+		is_hitstun = true
 		if killing_blow:
-			$IdleSprites.visible = false
 			$HitSprites.visible = false
 			$DeathSprites.visible = true
 			death_animation.play("DeathAnimation")
+			SyncManager.play_sound(str(get_path()) + ":killing_blow", KillingBlowSound)
 			print("PARTIDA FINALIZADA:= ", player_path)
 			emit_signal("game_lost")
-		hitstun_timer.start()
-		is_hitstun = true
 	
 func _on_HitstunTimer_timeout():
 	is_hitstun = false
 	$HitSprites.visible = false
-	if not $DeathSprites.visible && not is_lock && not is_lock_kick:
+	if not $DeathSprites.visible && not is_lock && not is_lock_kick && not is_hitstun:
 		$IdleSprites.visible = true
 
 func _on_BlockstunTimer_timeout():

@@ -1,6 +1,8 @@
 extends Area2D
 
 const PunchHitbox = preload("res://src/Attacks/PunchHitbox.tscn")
+const PunchSound = preload("res://assets/sounds/punch_long_whoosh_30.wav")
+
 onready var startup_timer = $StartupTimer
 onready var punch_timer = $PunchTimer
 onready var host_player = get_tree().get_root().get_node("Main/HostPlayer").get_path()
@@ -26,6 +28,7 @@ func _network_spawn(data: Dictionary) -> void:
 	
 	punch_timer.start()
 	startup_timer.start()
+	SyncManager.play_sound(str(get_path()) + ":punch", PunchSound)
 
 func _on_StartupTimer_timeout():
 	startup_timer.stop()

@@ -5,15 +5,15 @@
 [ext_resource path="res://src/Attacks/KickHitbox.gd" type="Script" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 93, 114 )
+extents = Vector2( 143.5, 113.5 )
 
 [node name="KickHitbox" type="Area2D" groups=["hitbox", "network_sync"]]
 script = ExtResource( 3 )
 
 [node name="AttackVisualBox" type="Sprite" parent="."]
 visible = false
-position = Vector2( 93.8122, -113.613 )
-scale = Vector2( 2.9, 3.575 )
+position = Vector2( 145, -114 )
+scale = Vector2( 4.5, 3.616 )
 texture = ExtResource( 2 )
 
 [node name="ActiveTimer" type="Node" parent="."]
@@ -21,7 +21,7 @@ script = ExtResource( 1 )
 wait_ticks = 2
 
 [node name="HitboxCollision" type="CollisionShape2D" parent="."]
-position = Vector2( 92, -113 )
+position = Vector2( 144.5, -113.5 )
 shape = SubResource( 1 )
 
 [connection signal="timeout" from="ActiveTimer" to="." method="_on_ActiveTimer_timeout"]

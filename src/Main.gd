@@ -16,6 +16,8 @@ onready var client_shields = $CanvasLayer/ClientShields
 onready var hostwin_label = $CanvasLayer/HostWins
 onready var clientwin_label = $CanvasLayer/ClientWins
 
+onready var music = $AudioStreamPlayer
+
 var host_wins = 0
 var client_wins = 0
 
@@ -78,7 +80,8 @@ func _on_ResetButton_pressed():
 
 func _on_SyncManager_sync_started() -> void:
 	message_label.text = "Started!"
-
+	music.play()
+	
 func _on_SyncManager_sync_stopped() -> void:
 	pass
 

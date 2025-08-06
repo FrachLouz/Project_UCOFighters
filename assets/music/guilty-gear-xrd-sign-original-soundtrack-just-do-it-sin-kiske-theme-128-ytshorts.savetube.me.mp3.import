@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/guilty-gear-xrd-sign-original-soundtrack-just-do-it-sin-kiske-theme-128-ytshorts.savetube.me.mp3-6975d37b7c7a379552168890645dfce3.mp3str"
+
+[deps]
+
+source_file="res://assets/music/guilty-gear-xrd-sign-original-soundtrack-just-do-it-sin-kiske-theme-128-ytshorts.savetube.me.mp3"
+dest_files=[ "res://.import/guilty-gear-xrd-sign-original-soundtrack-just-do-it-sin-kiske-theme-128-ytshorts.savetube.me.mp3-6975d37b7c7a379552168890645dfce3.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

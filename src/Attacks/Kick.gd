@@ -1,6 +1,8 @@
 extends Area2D
 
 const KickHitbox = preload("res://src/Attacks/KickHitbox.tscn")
+const KickSound = preload("res://assets/sounds/punch_long_whoosh_30.wav")
+
 onready var startup_timer = $StartupTimer
 onready var kick_timer = $KickTimer
 onready var host_player = get_tree().get_root().get_node("Main/HostPlayer").get_path()
@@ -26,6 +28,7 @@ func _network_spawn(data: Dictionary) -> void:
 	
 	kick_timer.start()
 	startup_timer.start()
+	SyncManager.play_sound(str(get_path()) + ":kick", KickSound)
 
 func _on_StartupTimer_timeout():
 	startup_timer.stop()
