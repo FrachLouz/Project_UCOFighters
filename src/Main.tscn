@@ -3,7 +3,7 @@
 [ext_resource path="res://src/Main.gd" type="Script" id=1]
 [ext_resource path="res://src/Player/Player.tscn" type="PackedScene" id=2]
 [ext_resource path="res://src/Wall/Wall.tscn" type="PackedScene" id=3]
-[ext_resource path="res://maxresdefault-750769485.jpg" type="Texture" id=4]
+[ext_resource path="res://resources/maxresdefault-750769485.jpg" type="Texture" id=4]
 [ext_resource path="res://themes/kenneyUI-blue.tres" type="Theme" id=5]
 
 [node name="Main" type="Node2D"]

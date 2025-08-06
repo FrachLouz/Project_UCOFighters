@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Attack3.png-4442b7fe9efa74495e8501a32524ee81.stex"
+path="res://.import/Male_spritesheet_kick_spin_high.png-fa8e0e080247c7c386169c3cd8c3d7b3.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/Attack3.png"
-dest_files=[ "res://.import/Attack3.png-4442b7fe9efa74495e8501a32524ee81.stex" ]
+source_file="res://resources/Male_spritesheet_kick_spin_high.png"
+dest_files=[ "res://.import/Male_spritesheet_kick_spin_high.png-fa8e0e080247c7c386169c3cd8c3d7b3.stex" ]
 
 [params]
 

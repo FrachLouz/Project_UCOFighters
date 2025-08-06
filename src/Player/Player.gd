@@ -129,8 +129,8 @@ func _on_SyncManager_scene_spawned(name, spawned_node, scene, data) -> void:
 		is_lock_kick = true
 		is_cancelable = false
 		$PunchSprites.visible = false
-		$KickSprites.visible = true
 		$IdleSprites.visible = false
+		$KickSprites.visible = true
 		kick_animation.play("KickAnimation")
 
 func _on_SyncManager_scene_despawned(name, despawned_node) -> void:
@@ -205,13 +205,13 @@ func manage_hit(object_path: NodePath, killing_blow: bool):
 			death_animation.play("DeathAnimation")
 			print("PARTIDA FINALIZADA:= ", player_path)
 			emit_signal("game_lost")
-		is_hitstun = true
 		hitstun_timer.start()
+		is_hitstun = true
 	
 func _on_HitstunTimer_timeout():
 	is_hitstun = false
 	$HitSprites.visible = false
-	if not $DeathSprites.visible:
+	if not $DeathSprites.visible && not is_lock && not is_lock_kick:
 		$IdleSprites.visible = true
 
 func _on_BlockstunTimer_timeout():
