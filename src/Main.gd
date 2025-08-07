@@ -4,7 +4,7 @@ const DummyNetworkAdaptor = preload("res://addons/godot-rollback-netcode/DummyNe
 
 #Variables del debugger
 const LOG_FILE_DIRECTORY = 'user://detailed_logs'
-var logging_enabled := false
+var logging_enabled := true
 
 onready var main_menu = $CanvasLayer/MainMenu
 onready var connection_panel = $CanvasLayer/ConnectionPanel
@@ -63,7 +63,7 @@ func _on_network_peer_connected(peer_id: int):
 	if get_tree().is_network_server():
 		message_label.text = "Starting..."
 		yield(get_tree().create_timer(1.0), "timeout")
-		#SyncManager.start()
+		SyncManager.start()
 		
 func _on_network_peer_disconnected(peer_id: int):
 	message_label.text = "Disconnected"

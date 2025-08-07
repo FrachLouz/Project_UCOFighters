@@ -69,6 +69,16 @@ func _predict_remote_input(previous_input: Dictionary, ticks_since_real_input: i
 func _network_process(input: Dictionary) -> void:
 	
 	if not is_game_over:
+		
+		#MANEJA LAS COLISIONES
+		var collision = check_colission()
+		if collision.has("source_path"):
+			print(collision)
+			print(collision.get("source_path"))
+			print(player_path)
+			print("ALGO HA CHOCADO")
+			if player_path == collision.get("source_path"):
+				manage_hit(collision.get("kills"))
 	
 		var motion = input.get("input_vector", Vector2.ZERO).normalized() * speed
 		var able = not is_lock && not is_hitstun && not is_blockstun
@@ -104,9 +114,6 @@ func _network_process(input: Dictionary) -> void:
 		
 		#MANEJA LAS ANIMAICONES
 		animation_tree(input)
-		
-		#MANEJA LAS COLISIONES
-		check_colission()
 
 func _will_collide(motion: Vector2) -> bool:
 	var space_state = get_world_2d().direct_space_state
@@ -120,6 +127,21 @@ func _will_collide(motion: Vector2) -> bool:
 
 	var result = space_state.intersect_shape(params, 1)
 	return result.size() > 0
+
+func check_colission() -> Dictionary:
+	if $PunchHitBox.monitoring:
+		for body in $PunchHitBox.get_overlapping_areas():
+			if body.get_parent().get_path() != self.get_path():
+				if body.get_parent().has_method('manage_hit'):
+					#body.get_parent().manage_hit(false)
+					return{"source_path": body.get_parent().get_path(), "kills": false}
+	if $KickHitBox.monitoring:
+		for body in $KickHitBox.get_overlapping_areas():
+			if body.get_parent().get_path() != self.get_path():
+				if body.get_parent().has_method('manage_hit'):
+					#body.get_parent().manage_hit(true)
+					return{"source_path": body.get_parent().get_path(), "kills": true}
+	return{}
 
 func manage_hit(killing_blow: bool):
 	
@@ -190,6 +212,11 @@ func _save_state() -> Dictionary:
 		"is_game_over": is_game_over,
 		"is_sliding": is_sliding,
 		
+		"punch_monitorable": $Punch.monitorable,
+		"kick_monitorable": $Kick.monitorable,
+		"kick_hitbox_monitoring": $KickHitBox.monitoring,
+		"punch_hitbox_monitoring": $PunchHitBox.monitoring,
+		
 		"idle_sprites": $Animations/IdleSprites.visible,
 		"move_sprites": $Animations/MoveSprites.visible,
 		"move_back_sprites": $Animations/MoveBackSprites.visible,
@@ -210,6 +237,11 @@ func _load_state(state: Dictionary) -> void:
 	shield_count = state["shield_count"]
 	is_game_over = state["is_game_over"]
 	is_sliding = state["is_sliding"]
+	
+	$Punch.monitorable = state["punch_monitorable"]
+	$Kick.monitorable = state["kick_monitorable"]
+	$KickHitBox.monitoring = state["kick_hitbox_monitoring"]
+	$PunchHitBox.monitoring = state["punch_hitbox_monitoring"]
 	
 	$Animations/IdleSprites.visible = state["idle_sprites"]
 	$Animations/MoveSprites.visible = state["move_sprites"]
@@ -271,6 +303,7 @@ func throw_punch():
 	animation_tree({})
 
 func throw_kick():
+	clear_punch()
 	is_cancelable = false
 	is_sliding = true
 	slide_timer.start()
@@ -295,17 +328,6 @@ func _on_KickStartupTimer_timeout():
 
 func _on_KickActiveTimer_timeout():
 	$KickHitBox.monitoring = false
-
-func check_colission():
-	for body in $PunchHitBox.get_overlapping_areas():
-		if body.get_parent().get_path() != self.get_path():
-			if body.get_parent().has_method('manage_hit'):
-				body.get_parent().manage_hit(false)
-	
-	for body in $KickHitBox.get_overlapping_areas():
-		if body.get_parent().get_path() != self.get_path():
-			if body.get_parent().has_method('manage_hit'):
-				body.get_parent().manage_hit(true)
 
 func clear_punch():
 	is_lock = false
@@ -346,3 +368,6 @@ func slide():
 
 func _on_SlideTimer_timeout():
 	is_sliding = false
+
+func _on_Player_game_lost():
+	pass

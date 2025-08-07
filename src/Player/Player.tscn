@@ -274,6 +274,7 @@ shape = SubResource( 1 )
 one_way_collision = true
 
 [node name="HurtboxArea" type="Area2D" parent="."]
+monitoring = false
 script = ExtResource( 4 )
 
 [node name="HurtboxCollisionShape" type="CollisionShape2D" parent="HurtboxArea"]
@@ -343,7 +344,7 @@ wait_ticks = 30
 [node name="SlideTimer" type="Node" parent="Kick"]
 script = ExtResource( 2 )
 one_shot = true
-wait_ticks = 30
+wait_ticks = 22
 
 [node name="KickHurtBoxCollision" type="CollisionShape2D" parent="Kick"]
 position = Vector2( 62, -88 )
