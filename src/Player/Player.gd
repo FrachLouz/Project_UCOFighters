@@ -185,7 +185,15 @@ func _save_state() -> Dictionary:
 		"is_hitstun": is_hitstun,
 		"is_blockstun": is_blockstun,
 		"shield_count": shield_count,
-		"is_game_over": is_game_over
+		"is_game_over": is_game_over,
+		
+		"idle_sprites": $Animations/IdleSprites.visible,
+		"move_sprites": $Animations/MoveSprites.visible,
+		"move_back_sprites": $Animations/MoveBackSprites.visible,
+		"punch_sprites": $Animations/PunchSprites.visible,
+		"kick_sprites": $Animations/KickSprites.visible,
+		"hit_sprites": $Animations/HitSprites.visible,
+		"death_sprites": $Animations/DeathSprites.visible
 		}
 
 func _load_state(state: Dictionary) -> void:
@@ -198,6 +206,13 @@ func _load_state(state: Dictionary) -> void:
 	is_blockstun = state["is_blockstun"]
 	shield_count = state["shield_count"]
 	is_game_over = state["is_game_over"]
+	$Animations/IdleSprites.visible = state["idle_sprites"]
+	$Animations/MoveSprites.visible = state["move_sprites"]
+	$Animations/MoveBackSprites.visible = state["move_back_sprites"]
+	$Animations/PunchSprites.visible = state["punch_sprites"]
+	$Animations/KickSprites.visible = state["kick_sprites"]
+	$Animations/HitSprites.visible = state["hit_sprites"]
+	$Animations/DeathSprites.visible = state["death_sprites"]
 
 func animation_tree(input: Dictionary):
 	
