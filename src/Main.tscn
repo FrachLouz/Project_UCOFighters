@@ -201,6 +201,7 @@ texture = ExtResource( 4 )
 
 [node name="ResetTimer" type="Node" parent="."]
 script = ExtResource( 7 )
+one_shot = true
 wait_ticks = 180
 
 [connection signal="pressed" from="CanvasLayer/MainMenu/OnlineButton" to="." method="_on_OnlineButton_pressed"]

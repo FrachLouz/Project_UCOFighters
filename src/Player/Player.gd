@@ -139,11 +139,9 @@ func manage_hit(killing_blow: bool):
 
 func _on_HitstunTimer_timeout():
 	is_hitstun = false
-	hitstun_timer.stop()
 
 func _on_BlockstunTimer_timeout():
 	is_blockstun = false
-	blockstun_timer.stop()
 	print("YA NO ESTOY EN BLOCKSTUN")
 
 func modify_shield(value: int):
@@ -165,13 +163,11 @@ func set_facing_left():
 		$KickHitBox.scale.x = -$KickHitBox.scale.x
 
 func _on_PunchTimer_timeout():
-	punch_timer.stop()
 	is_lock = false
 	is_cancelable = false
 	$Punch.monitorable = false
 
 func _on_KickTimer_timeout():
-	kick_timer.stop()
 	is_lock_kick = false
 	is_cancelable = false
 	$Kick.monitorable = false
@@ -275,23 +271,19 @@ func throw_kick():
 	animation_tree({})
 
 func _on_PunchStartupTimer_timeout():
-	punch_startup_timer.stop()
 	$PunchHitBox/PunchActiveTimer.start()
 	$PunchHitBox.monitoring = true
 
 func _on_PunchActiveTimer_timeout():
 	print("se puede cancelar")
 	is_cancelable = true
-	$PunchHitBox/PunchActiveTimer.stop()
 	$PunchHitBox.monitoring = false
 
 func _on_KickStartupTimer_timeout():
-	kick_startup_timer.stop()
 	$KickHitBox/KickActiveTimer.start()
 	$KickHitBox.monitoring = true
 
 func _on_KickActiveTimer_timeout():
-	$KickHitBox/KickActiveTimer.stop()
 	$KickHitBox.monitoring = false
 
 func check_colission():

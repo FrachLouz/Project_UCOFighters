@@ -287,10 +287,12 @@ monitorable = false
 
 [node name="PunchTimer" type="Node" parent="Punch"]
 script = ExtResource( 2 )
+one_shot = true
 wait_ticks = 69
 
 [node name="PunchStartupTimer" type="Node" parent="Punch"]
 script = ExtResource( 2 )
+one_shot = true
 wait_ticks = 30
 
 [node name="PunchHurtBoxCollision" type="CollisionShape2D" parent="Punch"]
@@ -310,6 +312,7 @@ monitorable = false
 
 [node name="PunchActiveTimer" type="Node" parent="PunchHitBox"]
 script = ExtResource( 2 )
+one_shot = true
 wait_ticks = 2
 
 [node name="PunchHitBoxCollision" type="CollisionShape2D" parent="PunchHitBox"]
@@ -329,10 +332,12 @@ monitorable = false
 
 [node name="KickTimer" type="Node" parent="Kick"]
 script = ExtResource( 2 )
+one_shot = true
 wait_ticks = 80
 
 [node name="KickStartupTimer" type="Node" parent="Kick"]
 script = ExtResource( 2 )
+one_shot = true
 wait_ticks = 30
 
 [node name="KickHurtBoxCollision" type="CollisionShape2D" parent="Kick"]
@@ -351,6 +356,7 @@ monitorable = false
 
 [node name="KickActiveTimer" type="Node" parent="KickHitBox"]
 script = ExtResource( 2 )
+one_shot = true
 wait_ticks = 2
 
 [node name="KickHitBoxCollision" type="CollisionShape2D" parent="KickHitBox"]
@@ -365,16 +371,14 @@ texture = ExtResource( 3 )
 
 [node name="Timers" type="Node" parent="."]
 
-[node name="CancelTimer" type="Node" parent="Timers"]
-script = ExtResource( 2 )
-wait_ticks = 33
-
 [node name="HitstunTimer" type="Node" parent="Timers"]
 script = ExtResource( 2 )
+one_shot = true
 wait_ticks = 66
 
 [node name="BlockstunTimer" type="Node" parent="Timers"]
 script = ExtResource( 2 )
+one_shot = true
 wait_ticks = 30
 
 [node name="Animations" type="Node2D" parent="."]
@@ -480,6 +484,5 @@ script = ExtResource( 6 )
 [connection signal="timeout" from="Kick/KickTimer" to="." method="_on_KickTimer_timeout"]
 [connection signal="timeout" from="Kick/KickStartupTimer" to="." method="_on_KickStartupTimer_timeout"]
 [connection signal="timeout" from="KickHitBox/KickActiveTimer" to="." method="_on_KickActiveTimer_timeout"]
-[connection signal="timeout" from="Timers/CancelTimer" to="." method="_on_CancelTimer_timeout"]
 [connection signal="timeout" from="Timers/HitstunTimer" to="." method="_on_HitstunTimer_timeout"]
 [connection signal="timeout" from="Timers/BlockstunTimer" to="." method="_on_BlockstunTimer_timeout"]
