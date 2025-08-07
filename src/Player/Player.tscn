@@ -28,10 +28,10 @@ extents = Vector2( 44.5, 25.25 )
 extents = Vector2( 89.6875, 26.25 )
 
 [sub_resource type="RectangleShape2D" id=35]
-extents = Vector2( 38.5, 88 )
+extents = Vector2( 61, 88 )
 
 [sub_resource type="RectangleShape2D" id=37]
-extents = Vector2( 143.5, 113.5 )
+extents = Vector2( 72.5, 113.5 )
 
 [sub_resource type="Animation" id=15]
 resource_name = "IdleAnimation"
@@ -340,14 +340,19 @@ script = ExtResource( 2 )
 one_shot = true
 wait_ticks = 30
 
+[node name="SlideTimer" type="Node" parent="Kick"]
+script = ExtResource( 2 )
+one_shot = true
+wait_ticks = 30
+
 [node name="KickHurtBoxCollision" type="CollisionShape2D" parent="Kick"]
-position = Vector2( 39.5, -88 )
+position = Vector2( 62, -88 )
 shape = SubResource( 35 )
 
 [node name="AttackVisualBox" type="Sprite" parent="Kick"]
 visible = false
-position = Vector2( 39, -89.25 )
-scale = Vector2( 1.21875, 2.80469 )
+position = Vector2( 61, -89.25 )
+scale = Vector2( 1.90625, 2.80469 )
 texture = ExtResource( 3 )
 
 [node name="KickHitBox" type="Area2D" parent="."]
@@ -360,13 +365,13 @@ one_shot = true
 wait_ticks = 2
 
 [node name="KickHitBoxCollision" type="CollisionShape2D" parent="KickHitBox"]
-position = Vector2( 144.5, -113.5 )
+position = Vector2( 73.5, -113.5 )
 shape = SubResource( 37 )
 
 [node name="AttackVisualBox" type="Sprite" parent="KickHitBox"]
 visible = false
-position = Vector2( 145, -114 )
-scale = Vector2( 4.5, 3.616 )
+position = Vector2( 73, -114 )
+scale = Vector2( 2.25, 3.616 )
 texture = ExtResource( 3 )
 
 [node name="Timers" type="Node" parent="."]
@@ -483,6 +488,7 @@ script = ExtResource( 6 )
 [connection signal="timeout" from="PunchHitBox/PunchActiveTimer" to="." method="_on_PunchActiveTimer_timeout"]
 [connection signal="timeout" from="Kick/KickTimer" to="." method="_on_KickTimer_timeout"]
 [connection signal="timeout" from="Kick/KickStartupTimer" to="." method="_on_KickStartupTimer_timeout"]
+[connection signal="timeout" from="Kick/SlideTimer" to="." method="_on_SlideTimer_timeout"]
 [connection signal="timeout" from="KickHitBox/KickActiveTimer" to="." method="_on_KickActiveTimer_timeout"]
 [connection signal="timeout" from="Timers/HitstunTimer" to="." method="_on_HitstunTimer_timeout"]
 [connection signal="timeout" from="Timers/BlockstunTimer" to="." method="_on_BlockstunTimer_timeout"]

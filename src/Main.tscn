@@ -1,11 +1,13 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://src/Main.gd" type="Script" id=1]
 [ext_resource path="res://src/Player/Player.tscn" type="PackedScene" id=2]
 [ext_resource path="res://src/Wall/Wall.tscn" type="PackedScene" id=3]
 [ext_resource path="res://assets/sprites/maxresdefault-750769485.jpg" type="Texture" id=4]
 [ext_resource path="res://themes/kenneyUI-blue.tres" type="Theme" id=5]
+[ext_resource path="res://assets/music/guilty-gear-xrd-sign-original-soundtrack-just-do-it-sin-kiske-theme-128-ytshorts.savetube.me.mp3" type="AudioStream" id=6]
 [ext_resource path="res://addons/godot-rollback-netcode/NetworkTimer.gd" type="Script" id=7]
+[ext_resource path="res://assets/sprites/Shield-PNG-Picture-4091217911.png" type="Texture" id=8]
 
 [node name="Main" type="Node2D"]
 script = ExtResource( 1 )
@@ -17,20 +19,22 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -75.0
-margin_top = -27.5
-margin_right = 75.0
-margin_bottom = 27.5
+margin_left = -105.5
+margin_top = -34.0
+margin_right = 105.5
+margin_bottom = 34.0
 
 [node name="OnlineButton" type="Button" parent="CanvasLayer/MainMenu"]
-margin_right = 71.3241
-margin_bottom = 55.0
+margin_right = 103.0
+margin_bottom = 68.0
+size_flags_horizontal = 3
 text = "ONLINE"
 
 [node name="OfflineButton" type="Button" parent="CanvasLayer/MainMenu"]
-margin_left = 75.0
-margin_right = 150.324
-margin_bottom = 55.0
+margin_left = 107.0
+margin_right = 211.0
+margin_bottom = 68.0
+size_flags_horizontal = 3
 text = "OFFLINE"
 
 [node name="ConnectionPanel" type="WindowDialog" parent="CanvasLayer"]
@@ -38,66 +42,69 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -280.0
-margin_top = -126.5
-margin_right = 280.0
-margin_bottom = 126.5
-theme = ExtResource( 5 )
+margin_left = -152.0
+margin_top = -81.0
+margin_right = 152.0
+margin_bottom = 81.0
 custom_constants/close_h_ofs = 0
-window_title = "Online"
+window_title = "ONLINE"
 
 [node name="GridContainer" type="GridContainer" parent="CanvasLayer/ConnectionPanel"]
-margin_left = 7.0
-margin_top = 7.0
-margin_right = 551.0
-margin_bottom = 248.0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -132.0
+margin_top = -68.0
+margin_right = 132.0
+margin_bottom = 68.0
 columns = 2
 
 [node name="HostLabel" type="Label" parent="CanvasLayer/ConnectionPanel/GridContainer"]
-margin_right = 270.0
-margin_bottom = 45.0
+margin_right = 130.0
+margin_bottom = 14.0
 size_flags_horizontal = 3
 size_flags_vertical = 2
 text = "Host:"
 
 [node name="HostField" type="LineEdit" parent="CanvasLayer/ConnectionPanel/GridContainer"]
-margin_left = 274.0
-margin_right = 544.0
-margin_bottom = 66.4343
+margin_left = 134.0
+margin_right = 264.0
+margin_bottom = 24.0
 size_flags_horizontal = 3
 size_flags_vertical = 2
 text = "127.0.0.1"
 
 [node name="PortLabel" type="Label" parent="CanvasLayer/ConnectionPanel/GridContainer"]
-margin_top = 81.0
-margin_right = 270.0
-margin_bottom = 126.0
+margin_top = 46.0
+margin_right = 130.0
+margin_bottom = 60.0
 size_flags_horizontal = 3
 size_flags_vertical = 2
 text = "Client:"
 
 [node name="PortField" type="LineEdit" parent="CanvasLayer/ConnectionPanel/GridContainer"]
-margin_left = 274.0
-margin_top = 81.0
-margin_right = 544.0
-margin_bottom = 147.434
+margin_left = 134.0
+margin_top = 46.0
+margin_right = 264.0
+margin_bottom = 70.0
 size_flags_horizontal = 3
 size_flags_vertical = 2
 text = "9999"
 
 [node name="HostButton" type="Button" parent="CanvasLayer/ConnectionPanel/GridContainer"]
-margin_top = 162.0
-margin_right = 270.0
-margin_bottom = 231.251
+margin_top = 92.0
+margin_right = 130.0
+margin_bottom = 112.0
 size_flags_horizontal = 3
 size_flags_vertical = 2
 text = "Host"
 
 [node name="ClientButton" type="Button" parent="CanvasLayer/ConnectionPanel/GridContainer"]
-margin_left = 274.0
-margin_top = 162.0
-margin_right = 544.0
-margin_bottom = 231.251
+margin_left = 134.0
+margin_top = 92.0
+margin_right = 264.0
+margin_bottom = 112.0
 size_flags_horizontal = 3
 size_flags_vertical = 2
 text = "Client"
@@ -136,47 +143,26 @@ theme = ExtResource( 5 )
 align = 1
 valign = 1
 
-[node name="HostShields" type="Label" parent="CanvasLayer"]
-anchor_top = 0.5
-anchor_bottom = 0.5
-margin_left = 9.0
-margin_top = -7.0
-margin_right = 49.0
-margin_bottom = 38.0
-theme = ExtResource( 5 )
-text = "3"
-align = 1
-valign = 1
-
-[node name="ClientShields" type="Label" parent="CanvasLayer"]
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-margin_left = -40.0
-margin_top = -7.0
-margin_bottom = 7.0
-theme = ExtResource( 5 )
-text = "3"
-align = 1
-valign = 1
-
 [node name="HostWins" type="Label" parent="CanvasLayer"]
-margin_left = 209.0
-margin_top = 530.0
-margin_right = 249.0
-margin_bottom = 544.0
+margin_left = 228.0
+margin_top = 533.0
+margin_right = 268.0
+margin_bottom = 578.0
+size_flags_horizontal = 3
+size_flags_vertical = 6
+theme = ExtResource( 5 )
 text = "0"
 align = 1
 valign = 1
 
 [node name="ClientWins" type="Label" parent="CanvasLayer"]
-anchor_top = 1.0
-anchor_bottom = 1.0
-margin_left = 779.0
-margin_top = -62.0
-margin_right = 819.0
-margin_bottom = -48.0
+margin_left = 765.0
+margin_top = 533.0
+margin_right = 805.0
+margin_bottom = 578.0
+size_flags_horizontal = 3
+size_flags_vertical = 6
+theme = ExtResource( 5 )
 text = "0"
 align = 1
 valign = 1
@@ -192,17 +178,67 @@ position = Vector2( 800, 240 )
 [node name="Wall2" parent="." instance=ExtResource( 3 )]
 position = Vector2( 1025, -2 )
 
+[node name="ShieldLayer" type="CanvasLayer" parent="."]
+
+[node name="HostShieldContainer" type="HBoxContainer" parent="ShieldLayer"]
+margin_left = 256.0
+margin_top = 65.0
+margin_right = 350.0
+margin_bottom = 105.0
+custom_constants/separation = 0
+
+[node name="Shield3" type="Sprite" parent="ShieldLayer/HostShieldContainer"]
+position = Vector2( 14, 20 )
+scale = Vector2( 0.016, 0.016 )
+texture = ExtResource( 8 )
+
+[node name="Shield2" type="Sprite" parent="ShieldLayer/HostShieldContainer"]
+position = Vector2( 47, 20 )
+scale = Vector2( 0.016, 0.016 )
+texture = ExtResource( 8 )
+
+[node name="Shield1" type="Sprite" parent="ShieldLayer/HostShieldContainer"]
+position = Vector2( 80, 20 )
+scale = Vector2( 0.016, 0.016 )
+texture = ExtResource( 8 )
+
+[node name="ClientShieldContainer" type="HBoxContainer" parent="ShieldLayer"]
+margin_left = 675.0
+margin_top = 65.0
+margin_right = 769.0
+margin_bottom = 104.0
+custom_constants/separation = 0
+
+[node name="Shield3" type="Sprite" parent="ShieldLayer/ClientShieldContainer"]
+position = Vector2( 80, 20 )
+scale = Vector2( 0.016, 0.016 )
+texture = ExtResource( 8 )
+
+[node name="Shield2" type="Sprite" parent="ShieldLayer/ClientShieldContainer"]
+position = Vector2( 47, 20 )
+scale = Vector2( 0.016, 0.016 )
+texture = ExtResource( 8 )
+
+[node name="Shield1" type="Sprite" parent="ShieldLayer/ClientShieldContainer"]
+position = Vector2( 14, 20 )
+scale = Vector2( 0.016, 0.016 )
+texture = ExtResource( 8 )
+
 [node name="BackGround" type="CanvasLayer" parent="."]
 layer = -1
 
 [node name="BackGroundSprite" type="Sprite" parent="BackGround"]
-position = Vector2( 477, 299 )
+position = Vector2( 508, 292 )
 texture = ExtResource( 4 )
 
 [node name="ResetTimer" type="Node" parent="."]
 script = ExtResource( 7 )
 one_shot = true
 wait_ticks = 180
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 6 )
+volume_db = -20.0
 
 [connection signal="pressed" from="CanvasLayer/MainMenu/OnlineButton" to="." method="_on_OnlineButton_pressed"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/OfflineButton" to="." method="_on_OfflineButton_pressed"]

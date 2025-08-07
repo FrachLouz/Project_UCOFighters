@@ -4,7 +4,7 @@ const DummyNetworkAdaptor = preload("res://addons/godot-rollback-netcode/DummyNe
 
 #Variables del debugger
 const LOG_FILE_DIRECTORY = 'user://detailed_logs'
-var logging_enabled := true
+var logging_enabled := false
 
 onready var main_menu = $CanvasLayer/MainMenu
 onready var connection_panel = $CanvasLayer/ConnectionPanel
@@ -17,8 +17,6 @@ onready var reset_timer = $ResetTimer
 
 #VARIABLES DE UI, SUJETAS A CAMBIO
 onready var win_screen = $CanvasLayer/WinScreenLabel
-onready var host_shields = $CanvasLayer/HostShields
-onready var client_shields = $CanvasLayer/ClientShields
 onready var hostwin_label = $CanvasLayer/HostWins
 onready var clientwin_label = $CanvasLayer/ClientWins
 
@@ -65,8 +63,8 @@ func _on_network_peer_connected(peer_id: int):
 	if get_tree().is_network_server():
 		message_label.text = "Starting..."
 		yield(get_tree().create_timer(1.0), "timeout")
-		SyncManager.start()
-
+		#SyncManager.start()
+		
 func _on_network_peer_disconnected(peer_id: int):
 	message_label.text = "Disconnected"
 	SyncManager.remove_peer(peer_id)
@@ -153,10 +151,14 @@ func _on_ClientPlayer_game_lost():
 	reset_timer.start()
 
 func _on_HostPlayer_update_shield():
-	host_shields.text = String($HostPlayer.shield_count)
+	var container = $ShieldLayer/HostShieldContainer
+	for i in range(container.get_child_count()):
+		container.get_child(i).visible = i < $HostPlayer.shield_count
 
 func _on_ClientPlayer_update_shield():
-	client_shields.text = String($ClientPlayer.shield_count)
+	var container = $ShieldLayer/ClientShieldContainer
+	for i in range(container.get_child_count()):
+		container.get_child(i).visible = i < $ClientPlayer.shield_count
 
 func _on_ResetTimer_timeout():
 	reset_timer.stop()

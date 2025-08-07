@@ -51,10 +51,6 @@ window/stretch/aspect="keep"
 
 enabled=PoolStringArray( "res://addons/godot-rollback-netcode/plugin.cfg" )
 
-[gui]
-
-theme/custom="res://themes/kenneyUI-blue.tres"
-
 [input]
 
 ui_left={
