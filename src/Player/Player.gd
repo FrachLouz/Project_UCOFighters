@@ -43,6 +43,8 @@ var shield_count = 3
 var is_sliding = false
 var is_game_over = false
 
+var collision = {}
+
 func _ready() -> void:
 	set_facing_left()
 	idle_animation.play("IdleAnimation")
@@ -71,14 +73,49 @@ func _network_process(input: Dictionary) -> void:
 	if not is_game_over:
 		
 		#MANEJA LAS COLISIONES
-		var collision = check_colission()
-		if collision.has("source_path"):
-			print(collision)
-			print(collision.get("source_path"))
-			print(player_path)
-			print("ALGO HA CHOCADO")
-			if player_path == collision.get("source_path"):
-				manage_hit(collision.get("kills"))
+		if $HurtboxArea.monitoring:
+			for area in $HurtboxArea.get_overlapping_areas():
+				if str(area.get_path()).ends_with("/KickHitBox"):
+					collision = {"source_path": area.get_parent().get_path(), "kills": true}
+				else:
+					collision = {"source_path": area.get_parent().get_path(), "kills": false}
+		if $Punch.monitoring:
+			for area in $HurtboxArea.get_overlapping_areas():
+				if str(area.get_path()).ends_with("/KickHitBox"):
+					collision = {"source_path": area.get_parent().get_path(), "kills": true}
+				else:
+					collision = {"source_path": area.get_parent().get_path(), "kills": false}
+		if $Kick.monitoring:
+			for area in $HurtboxArea.get_overlapping_areas():
+				if str(area.get_path()).ends_with("/KickHitBox"):
+					collision = {"source_path": area.get_parent().get_path(), "kills": true}
+				else:
+					collision = {"source_path": area.get_parent().get_path(), "kills": false}
+		#FIN DEL MANEJO DE COLISIONES
+		
+		#MANEJA LOS GOLPES
+		if collision.has("source_path") and collision.get("source_path") != player_path:
+			clear_punch()
+			clear_kick()
+			if is_blocking and shield_count > 0:
+				is_blockstun = true
+				SyncManager.play_sound(str(get_path()) + ":block", BlockSound)
+				blockstun_timer.start()
+				modify_shield(-1)
+			elif not is_blocking or shield_count == 0:
+				print(collision.get("kills"))
+				if not collision.get("kills"):
+					SyncManager.play_sound(str(get_path()) + ":blow", BlowSound)
+					hit_animation.play("HitAnimation")
+					is_hitstun = true
+					hitstun_timer.start()
+				else:
+					SyncManager.play_sound(str(get_path()) + ":killing_blow", KillingBlowSound)
+					death_animation.play("DeathAnimation")
+					is_lock = true
+					emit_signal("game_lost")
+			collision = {}
+		#FIN DEL MANEJO DE LOS GOLPES
 	
 		var motion = input.get("input_vector", Vector2.ZERO).normalized() * speed
 		var able = not is_lock && not is_hitstun && not is_blockstun
@@ -129,13 +166,13 @@ func _will_collide(motion: Vector2) -> bool:
 	return result.size() > 0
 
 func check_colission() -> Dictionary:
-	if $PunchHitBox.monitoring:
+	if $PunchHitBox.monitorable:
 		for body in $PunchHitBox.get_overlapping_areas():
 			if body.get_parent().get_path() != self.get_path():
 				if body.get_parent().has_method('manage_hit'):
 					#body.get_parent().manage_hit(false)
 					return{"source_path": body.get_parent().get_path(), "kills": false}
-	if $KickHitBox.monitoring:
+	if $KickHitBox.monitorable:
 		for body in $KickHitBox.get_overlapping_areas():
 			if body.get_parent().get_path() != self.get_path():
 				if body.get_parent().has_method('manage_hit'):
@@ -193,12 +230,12 @@ func set_facing_left():
 func _on_PunchTimer_timeout():
 	is_lock = false
 	is_cancelable = false
-	$Punch.monitorable = false
+	$Punch.monitoring = false
 
 func _on_KickTimer_timeout():
 	is_lock_kick = false
 	is_cancelable = false
-	$Kick.monitorable = false
+	$Kick.monitoring = false
 	
 func _save_state() -> Dictionary:
 	return { "position": position,
@@ -212,10 +249,10 @@ func _save_state() -> Dictionary:
 		"is_game_over": is_game_over,
 		"is_sliding": is_sliding,
 		
-		"punch_monitorable": $Punch.monitorable,
-		"kick_monitorable": $Kick.monitorable,
-		"kick_hitbox_monitoring": $KickHitBox.monitoring,
-		"punch_hitbox_monitoring": $PunchHitBox.monitoring,
+		"punch_monitoring": $Punch.monitoring,
+		"kick_monitoring": $Kick.monitoring,
+		"kick_hitbox_monitorable": $KickHitBox.monitorable,
+		"punch_hitbox_monitorable": $PunchHitBox.monitorable,
 		
 		"idle_sprites": $Animations/IdleSprites.visible,
 		"move_sprites": $Animations/MoveSprites.visible,
@@ -238,10 +275,10 @@ func _load_state(state: Dictionary) -> void:
 	is_game_over = state["is_game_over"]
 	is_sliding = state["is_sliding"]
 	
-	$Punch.monitorable = state["punch_monitorable"]
-	$Kick.monitorable = state["kick_monitorable"]
-	$KickHitBox.monitoring = state["kick_hitbox_monitoring"]
-	$PunchHitBox.monitoring = state["punch_hitbox_monitoring"]
+	$Punch.monitoring = state["punch_monitoring"]
+	$Kick.monitoring = state["kick_monitoring"]
+	$KickHitBox.monitorable = state["kick_hitbox_monitorable"]
+	$PunchHitBox.monitorable = state["punch_hitbox_monitorable"]
 	
 	$Animations/IdleSprites.visible = state["idle_sprites"]
 	$Animations/MoveSprites.visible = state["move_sprites"]
@@ -298,7 +335,7 @@ func throw_punch():
 	punch_animation.play("PunchAnimation")
 	punch_timer.start()
 	punch_startup_timer.start()
-	$Punch.monitorable = true
+	$Punch.monitoring = true
 	SyncManager.play_sound(str(get_path()) + ":blow", ThrowSound)
 	animation_tree({})
 
@@ -310,39 +347,39 @@ func throw_kick():
 	kick_animation.play("KickAnimation")
 	kick_timer.start()
 	kick_startup_timer.start()
-	$Kick.monitorable = true
+	$Kick.monitoring = true
 	SyncManager.play_sound(str(get_path()) + ":blow", ThrowSound)
 	animation_tree({})
 
 func _on_PunchStartupTimer_timeout():
 	$PunchHitBox/PunchActiveTimer.start()
-	$PunchHitBox.monitoring = true
+	$PunchHitBox.monitorable = true
 
 func _on_PunchActiveTimer_timeout():
 	is_cancelable = true
-	$PunchHitBox.monitoring = false
+	$PunchHitBox.monitorable = false
 
 func _on_KickStartupTimer_timeout():
 	$KickHitBox/KickActiveTimer.start()
-	$KickHitBox.monitoring = true
+	$KickHitBox.monitorable = true
 
 func _on_KickActiveTimer_timeout():
-	$KickHitBox.monitoring = false
+	$KickHitBox.monitorable = false
 
 func clear_punch():
 	is_lock = false
 	punch_timer.stop()
 	punch_startup_timer.stop()
 	$PunchHitBox/PunchActiveTimer.stop()
-	$Punch.monitorable = false
-	$PunchHitBox.monitoring = false
+	$Punch.monitoring = false
+	$PunchHitBox.monitorable = false
 
 func clear_kick():
 	kick_timer.stop()
 	kick_startup_timer.stop()
 	$KickHitBox/KickActiveTimer.stop()
-	$Kick.monitorable = false
-	$KickHitBox.monitoring = false
+	$Kick.monitoring = false
+	$KickHitBox.monitorable = false
 
 func reset():
 	position = original_position
