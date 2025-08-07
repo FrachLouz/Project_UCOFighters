@@ -11,7 +11,6 @@ extents = Vector2( 38.5, 88 )
 script = ExtResource( 2 )
 
 [node name="AttackVisualBox" type="Sprite" parent="."]
-visible = false
 position = Vector2( 39, -89.25 )
 scale = Vector2( 1.21875, 2.80469 )
 texture = ExtResource( 3 )

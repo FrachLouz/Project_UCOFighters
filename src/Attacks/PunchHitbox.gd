@@ -22,6 +22,7 @@ func _network_process(input:Dictionary):
 
 func _on_ActiveTimer_timeout():
 	SyncManager.despawn(self)
+	print(player_path)
 
 func check_colission():
 	for body in get_overlapping_areas():

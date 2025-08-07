@@ -1,28 +1,31 @@
 extends KinematicBody2D  # <--- cambia de Node2D a KinematicBody2D
 
-const Punch = preload("res://src/Attacks/Punch.tscn")
-const Kick = preload("res://src/Attacks/Kick.tscn")
-
 const BlowSound = preload("res://assets/sounds/body_hit_large_76.wav")
 const KillingBlowSound = preload("res://assets/sounds/body_hit_finisher_52.wav")
 const BlockSound = preload("res://assets/sounds/block_medium_25.wav")
+const ThrowSound = preload("res://assets/sounds/punch_long_whoosh_30.wav")
 
 onready var original_position = position
-onready var collision_shape = $CollisionShape2D
+onready var player_pushbox = $PushBox
 onready var hurtbox_shape = $HurtboxArea
-onready var hitstun_timer = $HitstunTimer
-onready var blockstun_timer = $BlockstunTimer
-onready var slide_timer = $SlideTimer
+onready var hitstun_timer = $Timers/HitstunTimer
+onready var blockstun_timer = $Timers/BlockstunTimer
+
+onready var punch_timer = $Punch/PunchTimer
+onready var punch_startup_timer = $Punch/PunchStartupTimer
+onready var kick_timer = $Kick/KickTimer
+onready var kick_startup_timer = $Kick/KickStartupTimer
+
 onready var main = get_tree().get_root().get_node("Main")
 onready var player_path = self.get_path()
 
-onready var idle_animation = $IdleAnimation
-onready var punch_animation = $PunchAnimation
-onready var kick_animation = $KickAnimation
-onready var move_animation = $MoveAnimation
-onready var move_back_animation = $MoveBackAnimation
-onready var hit_animation = $HitAnimation
-onready var death_animation = $DeathAnimation
+onready var idle_animation = $Animations/IdleAnimation
+onready var punch_animation = $Animations/PunchAnimation
+onready var kick_animation = $Animations/KickAnimation
+onready var move_animation = $Animations/MoveAnimation
+onready var move_back_animation = $Animations/MoveBackAnimation
+onready var hit_animation = $Animations/HitAnimation
+onready var death_animation = $Animations/DeathAnimation
 
 signal game_lost()
 signal update_shield()
@@ -37,11 +40,7 @@ var is_blockstun = false
 var is_blocking = false
 var shield_count = 3
 
-var sliding = false
-
 func _ready() -> void:
-	SyncManager.connect("scene_spawned", self, "_on_SyncManager_scene_spawned")
-	SyncManager.connect("scene_despawned", self, "_on_SyncManager_scene_despawned")
 	set_facing_left()
 	idle_animation.play("IdleAnimation")
 	move_animation.play("MoveAnimation")
@@ -67,7 +66,9 @@ func _predict_remote_input(previous_input: Dictionary, ticks_since_real_input: i
 func _network_process(input: Dictionary) -> void:
 	
 		var motion = input.get("input_vector", Vector2.ZERO).normalized() * speed
+		var able = not is_lock && not is_hitstun && not is_blockstun
 		
+		#MANEJA EL BLOQUEO
 		if player_path == "/root/Main/HostPlayer" && input.get("input_vector") == Vector2.LEFT:
 			is_blocking = true
 		elif player_path == "/root/Main/ClientPlayer" && input.get("input_vector") == Vector2.RIGHT:
@@ -75,42 +76,31 @@ func _network_process(input: Dictionary) -> void:
 		else:
 			is_blocking = false
 		
-		if input.get("attack", false) && not is_lock && not is_lock_kick && not is_hitstun && not is_blockstun:
-			SyncManager.spawn("Punch", get_parent(), Punch, { position = global_position, player = self})
+		#MANEJA EL PUÑETAZO 
+		if input.get("attack", false) && able:
+			throw_punch()
+			#TODO: ACTIVAR EL PUÑETAZO
+		
+		#MANEJA LA PATADA
+		if input.get("attack", false) && is_cancelable:
+			throw_kick()
+			is_lock_kick = true
+			is_cancelable = false
+			kick_timer.start()
+			#TODO: ACTIVAR LA PATADA
 			
-		if input.get("attack", false) && is_cancelable && not is_hitstun:
-			slide()
-			SyncManager.spawn("Kick", get_parent(), Kick, {position = global_position, player = self})
-			
-		if not _will_collide(motion) && not is_lock && not is_lock_kick && not is_hitstun && not is_blockstun:
-			if motion != Vector2(0,0):
-				if motion == Vector2(-speed,0) && player_path == "/root/Main/HostPlayer":
-					$MoveBackSprites.visible = true
-					$MoveSprites.visible = false
-				elif motion == Vector2(speed,0) && player_path != "/root/Main/HostPlayer":
-					$MoveBackSprites.visible = true
-					$MoveSprites.visible = false
-				else:
-					$MoveSprites.visible = true
-					$MoveBackSprites.visible = false
-				$IdleSprites.visible = false
-			else:
-				$MoveSprites.visible = false
-				$MoveBackSprites.visible = false
-				$IdleSprites.visible = true
+		#MANEJA EL MOVIMIENTO
+		if not _will_collide(motion) && able:
 			position += motion
-
-		if sliding:
-			if player_path == "/root/Main/HostPlayer":
-				if not _will_collide(Vector2(1,0) * speed):
-					position += Vector2(1,0) * speed
-			else:
-				if not _will_collide(Vector2(1,0) * speed):
-					position += Vector2(-1,0) * speed
+		#MANEJA LAS ANIMAICONES
+		animation_tree(input)
+		
+		#MANEJA LAS COLISIONES
+		check_colission()
 
 func _will_collide(motion: Vector2) -> bool:
 	var space_state = get_world_2d().direct_space_state
-	var shape = collision_shape.shape
+	var shape = player_pushbox.shape
 
 	var params = Physics2DShapeQueryParameters.new()
 	params.set_shape(shape)
@@ -121,50 +111,72 @@ func _will_collide(motion: Vector2) -> bool:
 	var result = space_state.intersect_shape(params, 1)
 	return result.size() > 0
 
-func _on_SyncManager_scene_spawned(name, spawned_node, scene, data) -> void:
+func manage_hit(killing_blow: bool):
 	
-	if name == 'Punch' and data['player_path'] == self.get_path():
-		is_lock = true
-		$IdleSprites.visible = false
-		$MoveSprites.visible = false
-		$MoveBackSprites.visible = false
-		$PunchSprites.visible = true
-		punch_animation.play("PunchAnimation")
+	clear_punch()
+	clear_kick()
+	if not is_blocking && shield_count > 0:
+		if not killing_blow:
+			hit_animation.play("HitAnimation")
+			is_hitstun = true
+			hitstun_timer.start()
+		else:
+			death_animation.play("DeathAnimation")
+			emit_signal("game_lost")
+	else:
+		is_blockstun = true
+		blockstun_timer.start()
+		modify_shield(-1)
 	
-	if name == 'Kick' and data['player_path'] == self.get_path():
-		is_lock_kick = true
-		is_cancelable = false
-		$PunchSprites.visible = false
-		$IdleSprites.visible = false
-		$KickSprites.visible = true
-		kick_animation.play("KickAnimation")
+	animation_tree({})
 
-func _on_SyncManager_scene_despawned(name, despawned_node) -> void:
-	
-	if name == 'Punch':
-		var player_path = despawned_node.player_path
-		var player_node = get_node(player_path)
-		if player_node == self:
-			is_lock = false
-			is_cancelable = false
-			if not is_lock_kick && not is_hitstun:
-				$IdleSprites.visible = true
-			$PunchSprites.visible = false
-	
-	if name == 'PunchHitbox':
-		var player_path = despawned_node.player_path
-		var player_node = get_node(player_path)
-		if player_node == self:
-			is_cancelable = true
-	
-	if name == 'Kick':
-		var player_path = despawned_node.player_path
-		var player_node = get_node(player_path)
-		if player_node == self:
-			is_lock_kick = false
-			$KickSprites.visible = false
-			$IdleSprites.visible = true
+func _on_HitstunTimer_timeout():
+	is_hitstun = false
+	hitstun_timer.stop()
 
+func _on_BlockstunTimer_timeout():
+	is_blockstun = false
+	blockstun_timer.stop()
+	print("YA NO ESTOY EN BLOCKSTUN")
+
+func reset():
+	$Animations/IdleSprites.visible = true
+	$Animations/DeathSprites.visible = false
+	position = original_position
+	is_lock = false
+	shield_count = 3
+	emit_signal("update_shield")
+
+func modify_shield(value: int):
+	shield_count += value
+	emit_signal("update_shield")
+
+func set_facing_left():
+	if player_path != "/root/Main/HostPlayer":
+		$Animations/IdleSprites.scale.x = -$Animations/IdleSprites.scale.x
+		$Animations/PunchSprites.scale.x = -$Animations/PunchSprites.scale.x
+		$Animations/KickSprites.scale.x = -$Animations/KickSprites.scale.x
+		$Animations/MoveSprites.scale.x = -$Animations/MoveSprites.scale.x
+		$Animations/MoveBackSprites.scale.x = -$Animations/MoveBackSprites.scale.x
+		$Animations/HitSprites.scale.x = -$Animations/HitSprites.scale.x
+		$Animations/DeathSprites.scale.x = -$Animations/DeathSprites.scale.x
+		$Punch.scale.x = -$Punch.scale.x
+		$PunchHitBox.scale.x = -$PunchHitBox.scale.x
+		$Kick.scale.x = -$Kick.scale.x
+		$KickHitBox.scale.x = -$KickHitBox.scale.x
+
+func _on_PunchTimer_timeout():
+	punch_timer.stop()
+	is_lock = false
+	is_cancelable = false
+	$Punch.monitorable = false
+
+func _on_KickTimer_timeout():
+	kick_timer.stop()
+	is_lock_kick = false
+	is_cancelable = false
+	$Kick.monitorable = false
+	
 func _save_state() -> Dictionary:
 	return { "position": position,
 		"is_lock": is_lock,
@@ -186,70 +198,111 @@ func _load_state(state: Dictionary) -> void:
 	is_blockstun = state["is_blockstun"]
 	shield_count = state["shield_count"]
 
-func manage_hit(object_path: NodePath, killing_blow: bool):
+func animation_tree(input: Dictionary):
 	
-	print(object_path, " ha golpeado a ", player_path)
-	if is_blocking == true && shield_count > 0:
-		print("ATAQUE BLOQUEADO")
-		modify_shield(-1)
-		is_blockstun = true
-		blockstun_timer.start()
-		SyncManager.play_sound(str(get_path()) + ":block", BlockSound)
-		$MoveSprites.visible = false
-		$MoveBackSprites.visible = false
-		$IdleSprites.visible = true
+	var motion = input.get("input_vector", Vector2.ZERO).normalized() * speed
+	
+	if not _will_collide(motion) && motion != Vector2.ZERO:
+		if player_path == "/root/Main/HostPlayer" && input.get('input_vector') == Vector2.LEFT:
+			update_sprites('MoveBackSprites')
+		elif player_path != "/root/Main/HostPlayer" && input.get('input_vector') == Vector2.RIGHT:
+			update_sprites('MoveBackSprites')
+		else:
+			update_sprites('MoveSprites')
 	else:
-		$MoveSprites.visible = false
-		$MoveBackSprites.visible = false
-		$HitSprites.visible = true
-		$IdleSprites.visible = false
-		hit_animation.play("HitAnimation")
-		SyncManager.play_sound(str(get_path()) + ":blow", BlowSound)
-		hitstun_timer.start()
-		is_hitstun = true
-		if killing_blow:
-			$HitSprites.visible = false
-			$DeathSprites.visible = true
-			death_animation.play("DeathAnimation")
-			SyncManager.play_sound(str(get_path()) + ":killing_blow", KillingBlowSound)
-			print("PARTIDA FINALIZADA:= ", player_path)
-			emit_signal("game_lost")
+		update_sprites('IdleSprites')
 	
-func _on_HitstunTimer_timeout():
-	is_hitstun = false
-	$HitSprites.visible = false
-	if not $DeathSprites.visible && not is_lock && not is_lock_kick && not is_hitstun:
-		$IdleSprites.visible = true
+	if is_blockstun:
+		update_sprites('IdleSprites')
+	
+	if punch_animation.is_playing():
+		update_sprites('PunchSprites')
+	if kick_animation.is_playing():
+		update_sprites('KickSprites')
+	if hit_animation.is_playing():
+		update_sprites('HitSprites')
+	if death_animation.is_playing():
+		update_sprites('DeathSprites')
 
-func _on_BlockstunTimer_timeout():
-	is_blockstun = false
-	print("YA NO ESTOY EN BLOCKSTUN")
+func update_sprites(sprites_name: String):
+	var sprite_names = [
+		'IdleSprites',
+		'MoveSprites',
+		'MoveBackSprites',
+		'PunchSprites',
+		'KickSprites',
+		'HitSprites',
+		'DeathSprites'
+	]
+	var container = $Animations
+	for i in sprite_names:
+		var node = container.get_node_or_null(i)
+		if node:
+			node.visible = (i == sprites_name)
 
-func reset():
-	$IdleSprites.visible = true
-	$DeathSprites.visible = false
-	position = original_position
+func throw_punch():
+	is_lock = true
+	punch_animation.play("PunchAnimation")
+	punch_timer.start()
+	punch_startup_timer.start()
+	$Punch.monitorable = true
+	SyncManager.play_sound(str(get_path()) + ":blow", ThrowSound)
+	animation_tree({})
+
+func throw_kick():
+	is_cancelable = false
+	kick_animation.play("KickAnimation")
+	kick_timer.start()
+	kick_startup_timer.start()
+	$Kick.monitorable = true
+	SyncManager.play_sound(str(get_path()) + ":blow", ThrowSound)
+	animation_tree({})
+
+func _on_PunchStartupTimer_timeout():
+	punch_startup_timer.stop()
+	$PunchHitBox/PunchActiveTimer.start()
+	$PunchHitBox.monitoring = true
+
+func _on_PunchActiveTimer_timeout():
+	print("se puede cancelar")
+	is_cancelable = true
+	$PunchHitBox/PunchActiveTimer.stop()
+	$PunchHitBox.monitoring = false
+
+func _on_KickStartupTimer_timeout():
+	kick_startup_timer.stop()
+	$KickHitBox/KickActiveTimer.start()
+	$KickHitBox.monitoring = true
+
+func _on_KickActiveTimer_timeout():
+	$KickHitBox/KickActiveTimer.stop()
+	$KickHitBox.monitoring = false
+
+func check_colission():
+	for body in $PunchHitBox.get_overlapping_areas():
+		if body.get_parent().get_path() != self.get_path():
+			print("PUÑO CHOCA CON ALGO")
+			if body.get_parent().has_method('manage_hit'):
+				body.get_parent().manage_hit(false)
+	
+	for body in $KickHitBox.get_overlapping_areas():
+		if body.get_parent().get_path() != self.get_path():
+			print("PATADA CHOCA CON ALGO")
+			if body.get_parent().has_method('manage_hit'):
+				body.get_parent().manage_hit(true)
+
+func clear_punch():
 	is_lock = false
-	shield_count = 3
-	emit_signal("update_shield")
-
-func modify_shield(value: int):
-	shield_count += value
-	emit_signal("update_shield")
-
-func slide():
-	sliding = true
-	slide_timer.start()
-
-func _on_SlideTimer_timeout():
-	sliding = false
+	punch_timer.stop()
+	punch_startup_timer.stop()
+	$PunchHitBox/PunchActiveTimer.stop()
+	$Punch.monitorable = false
+	$PunchHitBox.monitoring = false
 	
-func set_facing_left():
-	if player_path != "/root/Main/HostPlayer":
-		$IdleSprites.scale.x = -$IdleSprites.scale.x
-		$PunchSprites.scale.x = -$PunchSprites.scale.x
-		$KickSprites.scale.x = -$KickSprites.scale.x
-		$MoveSprites.scale.x = -$MoveSprites.scale.x
-		$MoveBackSprites.scale.x = -$MoveBackSprites.scale.x
-		$HitSprites.scale.x = -$HitSprites.scale.x
-		$DeathSprites.scale.x = -$DeathSprites.scale.x
+
+func clear_kick():
+	kick_timer.stop()
+	kick_startup_timer.stop()
+	$KickHitBox/KickActiveTimer.stop()
+	$Kick.monitorable = false
+	$KickHitBox.monitoring = false
