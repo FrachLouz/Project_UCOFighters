@@ -3,7 +3,7 @@ extends Node2D
 const DummyNetworkAdaptor = preload("res://addons/godot-rollback-netcode/DummyNetworkAdaptor.gd")
 
 #Variables del debugger
-const LOG_FILE_DIRECTORY = 'user://detailed_log'
+const LOG_FILE_DIRECTORY = 'user://detailed_logs'
 var logging_enabled := true
 
 onready var main_menu = $CanvasLayer/MainMenu
@@ -13,14 +13,14 @@ onready var port_field = $CanvasLayer/ConnectionPanel/GridContainer/PortField
 onready var message_label = $CanvasLayer/ConnectionLabel
 onready var sync_label = $CanvasLayer/SyncLostLabel
 
+onready var reset_timer = $ResetTimer
+
 #VARIABLES DE UI, SUJETAS A CAMBIO
 onready var win_screen = $CanvasLayer/WinScreenLabel
 onready var host_shields = $CanvasLayer/HostShields
 onready var client_shields = $CanvasLayer/ClientShields
 onready var hostwin_label = $CanvasLayer/HostWins
 onready var clientwin_label = $CanvasLayer/ClientWins
-
-onready var music = $AudioStreamPlayer
 
 var host_wins = 0
 var client_wins = 0
@@ -84,9 +84,8 @@ func _on_ResetButton_pressed():
 
 func _on_SyncManager_sync_started() -> void:
 	message_label.text = "Started!"
-	music.play()
 	
-	if logging_enabled:
+	if logging_enabled and not SyncReplay.active:
 		var dir = Directory.new()
 		if not dir.dir_exists(LOG_FILE_DIRECTORY):
 			dir.make_dir(LOG_FILE_DIRECTORY)
@@ -102,7 +101,7 @@ func _on_SyncManager_sync_started() -> void:
 			SyncManager.network_adaptor.get_network_unique_id(),
 		]
 		
-		SyncManager.start_logging(LOG_FILE_DIRECTORY + '/' + log_file_name)
+		SyncManager.start_logging(LOG_FILE_DIRECTORY + '/' + log_file_name, {})
 
 	
 func _on_SyncManager_sync_stopped() -> void:
@@ -124,12 +123,10 @@ func _on_SyncManager_sync_error(msg: String) -> void:
 		peer.close_connection()
 	get_tree().reload_current_scene()
 
-
 func _on_OnlineButton_pressed():
 	main_menu.visible = false
 	connection_panel.popup_centered()
 	SyncManager.reset_network_adaptor()
-
 
 func _on_OfflineButton_pressed():
 	main_menu.visible = false
@@ -137,44 +134,37 @@ func _on_OfflineButton_pressed():
 	SyncManager.start()
 	$ClientPlayer.input_prefix = "player2_"
 
-func restart_game():
-	yield(get_tree().create_timer(0.2), "timeout")
-	$ClientPlayer.reset()
-	$HostPlayer.reset()
-
 func _on_HostPlayer_game_lost():
+	$ClientPlayer.is_game_over = true
+	$HostPlayer.is_game_over = true
 	win_screen.text = "PLAYER 2 WINS"
 	win_screen.visible = true
 	client_wins += 1
 	clientwin_label.text = String(client_wins)
-	stop_match()
-	yield(get_tree().create_timer(3.0), "timeout")
-	restart_game()
-	win_screen.visible = false
-	
+	reset_timer.start()
+
 func _on_ClientPlayer_game_lost():
+	$ClientPlayer.is_game_over = true
+	$HostPlayer.is_game_over = true
 	win_screen.text = "PLAYER 1 WINS"
 	win_screen.visible = true
 	host_wins += 1
 	hostwin_label.text = String(host_wins)
-	stop_match()
-	yield(get_tree().create_timer(3.0), "timeout")
-	#yield(wait_for_restart(), "completed")
-	restart_game()
-	win_screen.visible = false
+	reset_timer.start()
 
 func _on_HostPlayer_update_shield():
 	host_shields.text = String($HostPlayer.shield_count)
-	
+
 func _on_ClientPlayer_update_shield():
 	client_shields.text = String($ClientPlayer.shield_count)
 
-func stop_match():
-	$HostPlayer.is_lock = true
-	$ClientPlayer.is_lock = true
+func _on_ResetTimer_timeout():
+	reset_timer.stop()
+	win_screen.visible = false
+	$ClientPlayer.is_game_over = false
+	$HostPlayer.is_game_over = false
+	$ClientPlayer.reset()
+	$HostPlayer.reset()
 
-func wait_for_restart():
-	while true:
-		yield(get_tree(), "idle_frame")
-		if Input.is_action_just_pressed("player1_attack") or Input.is_action_just_pressed("player2_attack"):
-			break
+func setup_match_for_replay(my_peer_id: int, peer_ids: Array, match_info: Dictionary) -> void:
+	connection_panel.visible = false

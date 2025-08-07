@@ -39,6 +39,7 @@ var is_hitstun = false
 var is_blockstun = false
 var is_blocking = false
 var shield_count = 3
+var is_game_over = false
 
 func _ready() -> void:
 	set_facing_left()
@@ -64,6 +65,8 @@ func _predict_remote_input(previous_input: Dictionary, ticks_since_real_input: i
 	return input
 
 func _network_process(input: Dictionary) -> void:
+	
+	if not is_game_over:
 	
 		var motion = input.get("input_vector", Vector2.ZERO).normalized() * speed
 		var able = not is_lock && not is_hitstun && not is_blockstun
@@ -115,16 +118,20 @@ func manage_hit(killing_blow: bool):
 	
 	clear_punch()
 	clear_kick()
-	if not is_blocking && shield_count > 0:
+	if not is_blocking:
 		if not killing_blow:
+			SyncManager.play_sound(str(get_path()) + ":blow", BlowSound)
 			hit_animation.play("HitAnimation")
 			is_hitstun = true
 			hitstun_timer.start()
 		else:
+			SyncManager.play_sound(str(get_path()) + ":killing_blow", KillingBlowSound)
 			death_animation.play("DeathAnimation")
+			is_lock = true
 			emit_signal("game_lost")
 	else:
 		is_blockstun = true
+		SyncManager.play_sound(str(get_path()) + ":block", BlockSound)
 		blockstun_timer.start()
 		modify_shield(-1)
 	
@@ -138,14 +145,6 @@ func _on_BlockstunTimer_timeout():
 	is_blockstun = false
 	blockstun_timer.stop()
 	print("YA NO ESTOY EN BLOCKSTUN")
-
-func reset():
-	$Animations/IdleSprites.visible = true
-	$Animations/DeathSprites.visible = false
-	position = original_position
-	is_lock = false
-	shield_count = 3
-	emit_signal("update_shield")
 
 func modify_shield(value: int):
 	shield_count += value
@@ -185,7 +184,8 @@ func _save_state() -> Dictionary:
 		"is_blocking": is_blocking,
 		"is_hitstun": is_hitstun,
 		"is_blockstun": is_blockstun,
-		"shield_count": shield_count
+		"shield_count": shield_count,
+		"is_game_over": is_game_over
 		}
 
 func _load_state(state: Dictionary) -> void:
@@ -197,12 +197,13 @@ func _load_state(state: Dictionary) -> void:
 	is_hitstun = state["is_hitstun"]
 	is_blockstun = state["is_blockstun"]
 	shield_count = state["shield_count"]
+	is_game_over = state["is_game_over"]
 
 func animation_tree(input: Dictionary):
 	
 	var motion = input.get("input_vector", Vector2.ZERO).normalized() * speed
 	
-	if not _will_collide(motion) && motion != Vector2.ZERO:
+	if not _will_collide(motion) && motion != Vector2.ZERO && not is_lock:
 		if player_path == "/root/Main/HostPlayer" && input.get('input_vector') == Vector2.LEFT:
 			update_sprites('MoveBackSprites')
 		elif player_path != "/root/Main/HostPlayer" && input.get('input_vector') == Vector2.RIGHT:
@@ -298,7 +299,6 @@ func clear_punch():
 	$PunchHitBox/PunchActiveTimer.stop()
 	$Punch.monitorable = false
 	$PunchHitBox.monitoring = false
-	
 
 func clear_kick():
 	kick_timer.stop()
@@ -306,3 +306,13 @@ func clear_kick():
 	$KickHitBox/KickActiveTimer.stop()
 	$Kick.monitorable = false
 	$KickHitBox.monitoring = false
+
+func reset():
+	position = original_position
+	is_lock = false
+	is_lock_kick = false
+	is_cancelable = false
+	is_hitstun = false
+	is_blockstun = false
+	is_blocking = false
+	shield_count = 3
